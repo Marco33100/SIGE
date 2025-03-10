@@ -13,19 +13,19 @@
                 <form>
                     <div data-mdb-input-init class="form-outline mb-3">
                         <input type="text" id="form3Example3" class="form-control form-control-lg"
-                            placeholder="Ingresa tu usuario" />
-                        <label class="form-label" for="form3Example3">Usuario</label>
+                            placeholder="Ingresa tu usuario" [(ngModel)]="username" name="username" />
+                        <label class="form-label" for="form3Example3">Clave Usuario</label>
                     </div>
 
                     <div data-mdb-input-init class="form-outline mb-2">
                         <input type="password" id="form3Example4" class="form-control form-control-lg"
-                            placeholder="Ingresa tu contraseña" />
+                            placeholder="Ingresa tu contraseña" [(ngModel)]="password" name="password" />
                         <label class="form-label" for="form3Example4">Contraseña</label>
                     </div>
 
                     <div class="text-center text-lg-start mt-4 pt-2">
                         <button type="button" data-mdb-button-init data-mdb-ripple-init class="btn btn-primary btn-lg"
-                            style="padding-left: 2.5rem; padding-right: 2.5rem;">Entrar</button>
+                            style="padding-left: 2.5rem; padding-right: 2.5rem;" (click)="onLogin()">Entrar</button>
                     </div>
                 </form>
             </div>

@@ -4,7 +4,15 @@ import { HomeComponent } from './home/home.component';
 import { InicioComponent } from './inicio/inicio.component';
 
 export const routes: Routes = [
-    {path: 'login', component: LoginComponent},
+    {
+        path: 'login', 
+        component: LoginComponent,
+        children:[
+            {
+                path: '', component: LoginComponent
+            },
+        ],
+    },
     {
         path: 'home',
         component: HomeComponent,
@@ -12,5 +20,6 @@ export const routes: Routes = [
             { path: '', component: InicioComponent },
         ],
     },
-    { path: '', redirectTo: '/home', pathMatch: 'full' },
+    {path:'inicio', component: InicioComponent},
+    { path: '', redirectTo: '/login', pathMatch: 'full' },
 ];
