@@ -5,6 +5,8 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 
 const empleadosRoutes = require('./routes/empleadoRoutes');
+const actividadesRoutes = require('./routes/actividadRoutes');
+const cursosRoutes = require('./routes/cursoRoutes')
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -16,6 +18,12 @@ app.use(express.json()); // Habilita JSON en las solicitudes
 
 // Rutas
 app.use('/api/empleados', empleadosRoutes);
+
+//Actividades
+app.use('/api/actividades', actividadesRoutes);
+
+//Cursos
+app.use('/api/cursos', cursosRoutes);
 
 // Conexión a MongoDB
 mongoose.connect(MONGO_URI)

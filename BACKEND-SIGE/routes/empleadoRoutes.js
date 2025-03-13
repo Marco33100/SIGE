@@ -12,8 +12,6 @@ router.post('/login', async (req, res) => {
         if (!empleado || contraseña !== empleado.contraseña) {
             return res.status(401).json({ msg: 'Credenciales inválidas' });
         }
-
-        // Respuesta de éxito incluyendo el rol
         res.json({ 
             msg: 'Login exitoso', 
             empleado: {
