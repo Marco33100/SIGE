@@ -1,35 +1,138 @@
 const mongoose = require('mongoose');
 
 const EmpleadoSchema = new mongoose.Schema({
-    claveEmpleado: String,
-    nombreEmpleado: String,
-    apellidoP: String,
-    apellidoM: String,
-    contraseña: String,
-    fechaAlta: { type: Date, default: Date.now },
-    rfc: String,
-    fechaNacimiento: Date,
-    sexo: String,
-    fotoEmpleado: String,
-    domicilio: {
-        calle: String,
-        numInterior: String,
-        numExterior: String,
-        colonia: String,
-        codigoPostal: Number,
-        ciudad: String
+    claveEmpleado: {
+        type: String,
+        required: true,
+        unique: true,
+        trim: true
     },
-    departamento: String,
-    puesto: String,
-    telefono: [String],
-    correoElectronico: [String],
-    referenciasFamiliares: [{
-        nomCompleto: String,
-        parentesco: String,
-        telefono: [String],
-        correo: [String]
+    nombreEmpleado: {
+        type: String,
+        required: true,
+        trim: true
+    },
+    apellidoP: {
+        type: String,
+        required: true,
+        trim: true
+    },
+    apellidoM: {
+        type: String,
+        trim: true
+    },
+    contraseña: {
+        type: String,
+        required: true
+    },
+    fechaAlta: { 
+        type: Date, 
+        default: Date.now 
+    },
+    rfc: {
+        type: String,
+        trim: true,
+        uppercase: true
+    },
+    fechaNacimiento: {
+        type: Date,
+        required: true
+    },
+    sexo: {
+        type: String,
+        enum: ['Masculino', 'Femenino', 'Otro'],
+        required: true
+    },
+    fotoEmpleado: {
+        type: String
+    },
+    domicilio: {
+        calle: {
+            type: String,
+            required: true,
+            trim: true
+        },
+        numInterior: {
+            type: String,
+            trim: true
+        },
+        numExterior: {
+            type: String,
+            trim: true
+        },
+        colonia: {
+            type: String,
+            required: true,
+            trim: true
+        },
+        codigoPostal: {
+            type: Number,
+            required: true
+        },
+        ciudad: {
+            type: String,
+            required: true,
+            trim: true
+        }
+    },
+    departamento: {
+        type: String,
+        required: true,
+        trim: true
+    },
+    puesto: {
+        type: String,
+        required: true,
+        trim: true
+    },
+    telefono: [{
+        type: String,
+        trim: true
     }],
-    rol: Number
+    correoElectronico: [{
+        type: String,
+        trim: true,
+        lowercase: true
+    }],
+    referenciasFamiliares: [{
+        nomCompleto: {
+            type: String,
+            required: true,
+            trim: true
+        },
+        parentesco: {
+            type: String,
+            required: true,
+            trim: true
+        },
+        telefono: [{
+            type: String,
+            trim: true
+        }],
+        correo: [{
+            type: String,
+            trim: true,
+            lowercase: true
+        }]
+    }],
+    rol: {
+        type: Number,
+        enum: [1, 2, 3], // 1: Administrador, 2: Supervisor, 3: Empleado normal
+        required: true,
+        default: 3
+    },
+    activo: {
+        type: Boolean,
+        default: true
+    }
 });
+
+// Índices para mejorar búsquedas frecuentes
+EmpleadoSchema.index({ claveEmpleado: 1 });
+EmpleadoSchema.index({ apellidoP: 1, apellidoM: 1, nombreEmpleado: 1 });
+EmpleadoSchema.index({ departamento: 1 });
+EmpleadoSchema.index({ puesto: 1 });
+EmpleadoSchema.index({ fechaAlta: 1 });
+EmpleadoSchema.index({ rol: 1 });
 
 module.exports = mongoose.model('Empleado', EmpleadoSchema);

@@ -17,7 +17,7 @@ app.use(cors()); // Permite solicitudes desde otros dominios
 app.use(express.json()); // Habilita JSON en las solicitudes
 
 // Rutas
-app.use('/api/empleados', empleadosRoutes);
+app.use('/api/', empleadosRoutes);
 
 //Actividades
 app.use('/api/actividades', actividadesRoutes);
