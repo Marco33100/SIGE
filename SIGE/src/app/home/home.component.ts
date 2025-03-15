@@ -54,9 +54,9 @@ export class HomeComponent implements OnInit {
       case 2: // Administrador de cursos
         return [
           { label: 'Inicio', icon: 'home', url: '/home' },
-          { label: 'Buscar curso', icon: 'search', url: '/home/buscar-curso' },
-          { label: 'Registrar curso', icon: 'app_registration', url: '/home/registrar-curso' },
-          { label: 'Listar cursos', icon: 'list', url: '/home/listar-curso' }
+          { label: 'Agregar actividades', icon: 'search', url: '/home/agregar-actividad' },
+          { label: 'Agregar cursos', icon: 'app_registration', url: '/home/agregar-curso' },
+          { label: 'Empleados', icon: 'search', url: '/home/buscar-empleadoCA' },
         ];
       case 3: // Empleado
         return [
