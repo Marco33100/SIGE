@@ -345,37 +345,7 @@ router.get('/cursos', async (req, res) => {
     }
 });
 
-// CU09: Visualizar actividades con filtros
-router.get('/visualizarActividades', async (req, res) => {
-    try {
-        const { estatusActividad, claveEmpleado, nomActividad } = req.query;
-        
-        // Construir el filtro
-        const filtro = {};
-        
-        if (estatusActividad !== undefined) {
-            filtro.estatusActividad = Number(estatusActividad);
-        }
-        
-        if (claveEmpleado) {
-            filtro.claveEmpleado = claveEmpleado;
-        }
-        
-        if (nomActividad) {
-            filtro.nomActividad = nomActividad;
-        }
-        
-        const actividades = await ActividadEmpleado.find(filtro);
-        
-        res.json({
-            total: actividades.length,
-            actividades
-        });
-    } catch (error) {
-        console.error('Error al visualizar actividades:', error);
-        res.status(500).json({ msg: 'Error interno del servidor' });
-    }
-});
+
 
 
 module.exports = router;

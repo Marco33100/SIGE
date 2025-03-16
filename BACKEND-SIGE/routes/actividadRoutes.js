@@ -29,13 +29,12 @@ router.post('/agregarActividadEmpleado', async (req, res) => {
         if (!estatusExiste && estatusActividad !== undefined) {
             return res.status(404).json({ msg: 'El estatus especificado no existe en el catálogo' });
         }
-        
         // Crear nueva actividad para el empleado
         const nuevaActividadEmpleado = new ActividadEmpleado({
             claveEmpleado,
             nomActividad,
             descripcionAct,
-            estatusActividad: estatusActividad || 0 // Usa el valor por defecto (0) si no se proporciona
+            estatusActividad: estatusActividad || 0
         });
         
         await nuevaActividadEmpleado.save();
@@ -70,6 +69,41 @@ router.get('/actividades', async (req, res) => {
         res.json(actividades);
     } catch (error) {
         console.error('Error al obtener actividades:', error);
+        res.status(500).json({ msg: 'Error interno del servidor' });
+    }
+});
+
+// CU09: Visualizar actividades con filtros
+router.get('/visualizarActividades', async (req, res) => {
+    try {
+        const { estatusActividad, claveEmpleado, nomActividad } = req.query;
+        
+        // Construir el filtro
+        const filtro = [];
+        
+        if (estatusActividad !== undefined && estatusActividad !== '') {
+            filtro.push({ estatusActividad: Number(estatusActividad) });
+        }
+        
+        if (claveEmpleado && claveEmpleado !== '') {
+            filtro.push({ claveEmpleado: claveEmpleado });
+        }
+        
+        if (nomActividad && nomActividad !== '') {
+            filtro.push({ nomActividad: nomActividad });
+        }
+        
+        // Si no hay filtros, devolver todas las actividades
+        const actividades = filtro.length === 0
+            ? await ActividadEmpleado.find()
+            : await ActividadEmpleado.find({ $or: filtro });
+        
+        res.json({
+            total: actividades.length,
+            actividades
+        });
+    } catch (error) {
+        console.error('Error al visualizar actividades:', error);
         res.status(500).json({ msg: 'Error interno del servidor' });
     }
 });
