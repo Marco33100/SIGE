@@ -346,6 +346,60 @@ router.get('/cursos', async (req, res) => {
 });
 
 
+// endpoint para traer la informacion del empleado
+router.get('/personal/:claveEmpleado', async (req, res) => {
+    try {
+        const { claveEmpleado } = req.params;
+        
+        // Validar que se proporcionó una clave de empleado
+        if (!claveEmpleado) {
+            return res.status(400).json({
+                exito: false,
+                mensaje: 'Se requiere la clave de empleado'
+            });
+        }
+        
+        // Buscar empleado por clave
+        const empleado = await Empleado.findOne({ claveEmpleado });
+        
+        // Verificar si se encontró
+        if (!empleado) {
+            return res.status(404).json({
+                exito: false,
+                mensaje: `No se encontró empleado con la clave: ${claveEmpleado}`
+            });
+        }
+        
+        // Devolver solo la información personal del empleado
+        res.status(200).json({
+            exito: true,
+            mensaje: 'Información personal del empleado obtenida con éxito',
+            datosPersonales: {
+                claveEmpleado: empleado.claveEmpleado,
+                nombreEmpleado: empleado.nombreEmpleado,
+                apellidoP: empleado.apellidoP,
+                apellidoM: empleado.apellidoM,
+                fechaNacimiento: empleado.fechaNacimiento,
+                rfc: empleado.rfc,
+                sexo: empleado.sexo,
+                fotoEmpleado: empleado.fotoEmpleado,
+                domicilio: empleado.domicilio,
+                telefono: empleado.telefono,
+                correoElectronico: empleado.correoElectronico,
+                referenciasFamiliares: empleado.referenciasFamiliares
+            }
+        });
+        
+    } catch (error) {
+        console.error('Error al consultar información personal:', error);
+        res.status(500).json({
+            exito: false,
+            mensaje: 'Error al obtener la información personal del empleado',
+            error: error.message
+        });
+    }
+});
+
 
 
 module.exports = router;

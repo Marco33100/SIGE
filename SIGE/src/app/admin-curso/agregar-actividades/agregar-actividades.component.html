@@ -1,8 +1,7 @@
 <div class="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
-
     <div class="bg-white rounded-xl shadow-xl overflow-hidden">
         <!-- Encabezado del formulario -->
-        <div class="bg-gradient-to-r from-blue-600 to-blue-700 px-8 py-6">
+        <div class="bg-gradient-to-r from-yellow-600 to-orange-700 px-8 py-6">
             <h2 class="text-2xl font-bold text-white">Agregar Actividad</h2>
             <p class="mt-2 text-blue-100">Complete la información para registrar una nueva actividad</p>
         </div>
@@ -56,27 +55,26 @@
                 <p class="mt-1 text-sm text-red-500 hidden">Por favor, selecciona una actividad.</p>
             </div>
 
-<!-- Descripción -->
-<div>
-    <label for="descripcionAct" class="block text-sm font-semibold text-gray-700 mb-2">
-        Descripción <span class="text-red-500">*</span>
-    </label>
-    <div class="relative">
-        <div class="absolute top-3 left-3 pointer-events-none">
-            <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-        </div>
-        <textarea id="descripcionAct" [(ngModel)]="actividad.descripcionAct" name="descripcionAct" rows="4" required
-            class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-            placeholder="Describa los detalles de la actividad..."></textarea>
-    </div>
-    <p class="mt-1 text-sm text-red-500 hidden" id="errorDescripcion">
-        Por favor, ingresa una descripción.
-    </p>
-</div>
-
+            <!-- Descripción -->
+            <div>
+                <label for="descripcionAct" class="block text-sm font-semibold text-gray-700 mb-2">
+                    Descripción <span class="text-red-500">*</span>
+                </label>
+                <div class="relative">
+                    <div class="absolute top-3 left-3 pointer-events-none">
+                        <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </div>
+                    <textarea id="descripcionAct" [(ngModel)]="actividad.descripcionAct" name="descripcionAct" rows="4" required
+                        class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                        placeholder="Describa los detalles de la actividad..."></textarea>
+                </div>
+                <p class="mt-1 text-sm text-red-500 hidden" id="errorDescripcion">
+                    Por favor, ingresa una descripción.
+                </p>
+            </div>
 
             <!-- Estatus -->
             <div>
@@ -91,11 +89,10 @@
                         </svg>
                     </div>
                     <select id="estatusActividad" [(ngModel)]="actividad.estatusActividad" name="estatusActividad"
-                        required
                         class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-white appearance-none">
                         <option value="" disabled selected>Seleccione un estatus</option>
                         <option *ngFor="let estatus of estatusList" [value]="estatus.estatus">
-                            {{ estatus.estatus }}
+                            {{ estatus.estatus === 1 ? 'Participó' : 'No participó' }}
                         </option>
                     </select>
                     <div class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
@@ -106,7 +103,6 @@
                 </div>
                 <p class="mt-1 text-sm text-red-500 hidden">Por favor, selecciona un estatus.</p>
             </div>
-
 
             <!-- Boton de guardar -->
             <div class="pt-6 flex justify-center">
