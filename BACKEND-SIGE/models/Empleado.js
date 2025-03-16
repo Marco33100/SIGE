@@ -128,7 +128,10 @@ const EmpleadoSchema = new mongoose.Schema({
 });
 
 // Índices para mejorar búsquedas frecuentes
-EmpleadoSchema.index({ claveEmpleado: 1 });
+// Comente esta linea porque me marca este error we 
+//(node:17532) [MONGOOSE] Warning: Duplicate schema index on {"claveEmpleado":1} found. This is often due to declaring an index using both "index: true" and "schema.index()". Please remove the duplicate index definition.
+//(Use `node --trace-warnings ...` to show where the warning was created)
+//EmpleadoSchema.index({ claveEmpleado: 1 });
 EmpleadoSchema.index({ apellidoP: 1, apellidoM: 1, nombreEmpleado: 1 });
 EmpleadoSchema.index({ departamento: 1 });
 EmpleadoSchema.index({ puesto: 1 });

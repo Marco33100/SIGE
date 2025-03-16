@@ -7,7 +7,7 @@ import { HomeComponent } from './home/home.component';
 import { InicioComponent } from './inicio/inicio.component';
 import { AgregarActividadesComponent } from './admin-curso/agregar-actividades/agregar-actividades.component';
 import { AgregarCursosComponent } from './admin-curso/agregar-cursos/agregar-cursos.component';
-import { BuscarEmpleadoCursoComponent } from './buscar-empleado-curso/buscar-empleado-curso.component';
+import { BuscarEmpleadoCursoComponent } from './admin-curso/buscar-empleado-curso/buscar-empleado-curso.component';
 import { VisualizarActividadesComponent } from './admin-curso/visualizar-actividades/visualizar-actividades.component';
 import { VisualizarCursosComponent } from './admin-curso/visualizar-cursos/visualizar-cursos.component';
 export const routes: Routes = [

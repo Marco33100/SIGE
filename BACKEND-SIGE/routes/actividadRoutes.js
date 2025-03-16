@@ -29,13 +29,12 @@ router.post('/agregarActividadEmpleado', async (req, res) => {
         if (!estatusExiste && estatusActividad !== undefined) {
             return res.status(404).json({ msg: 'El estatus especificado no existe en el catálogo' });
         }
-        
         // Crear nueva actividad para el empleado
         const nuevaActividadEmpleado = new ActividadEmpleado({
             claveEmpleado,
             nomActividad,
             descripcionAct,
-            estatusActividad: estatusActividad || 0 // Usa el valor por defecto (0) si no se proporciona
+            estatusActividad: estatusActividad || 0
         });
         
         await nuevaActividadEmpleado.save();
