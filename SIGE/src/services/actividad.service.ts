@@ -23,4 +23,9 @@ export class ActividadService {
   obtenerActividades(): Observable<any> {
     return this.http.get(`${this.apiUrl}/actividades`);
   }
+
+  //CU09 Visualizar actividades con filtros
+  visualizarActividadesConFiltros(filtros: any): Observable<any> {
+    return this.http.get(`${this.apiUrl}/visualizarActividades`, { params: filtros });
+  }
 }

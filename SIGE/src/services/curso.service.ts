@@ -23,7 +23,14 @@ export class CursoService {
     return this.http.get(`${this.apiUrl}/documentos`);
   }
 
-  obtenerCursos(): Observable<any>{
+  obtenerCursos(): Observable<any> {
     return this.http.get(`${this.apiUrl}/cursos`);
   }
+
+  //Visualizar cursos con filtros CU08
+  visualizarCursosConFiltros(filtros: any): Observable<any> {
+    return this.http.get(`${this.apiUrl}/visualizarCursos`, { params: filtros });
+  }
+
+
 }
