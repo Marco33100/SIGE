@@ -4,7 +4,7 @@ const EmpleadoSchema = new mongoose.Schema({
     claveEmpleado: {
         type: String,
         required: true,
-        unique: true,
+        unique: true, // ✅ Esto ya crea el índice único automáticamente
         trim: true
     },
     nombreEmpleado: {
@@ -128,7 +128,6 @@ const EmpleadoSchema = new mongoose.Schema({
 });
 
 // Índices para mejorar búsquedas frecuentes
-EmpleadoSchema.index({ claveEmpleado: 1 });
 EmpleadoSchema.index({ apellidoP: 1, apellidoM: 1, nombreEmpleado: 1 });
 EmpleadoSchema.index({ departamento: 1 });
 EmpleadoSchema.index({ puesto: 1 });

@@ -4,6 +4,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 
+const catalogoRoutes = require('./routes/catalogoRoutes');
 const empleadosRoutes = require('./routes/empleadoRoutes');
 const actividadesRoutes = require('./routes/actividadRoutes');
 const cursosRoutes = require('./routes/cursoRoutes')
@@ -17,13 +18,16 @@ app.use(cors()); // Permite solicitudes desde otros dominios
 app.use(express.json()); // Habilita JSON en las solicitudes
 
 // Rutas
-app.use('/api/', empleadosRoutes);
+app.use('/api/empleados', empleadosRoutes);
 
 //Actividades
 app.use('/api/actividades', actividadesRoutes);
 
 //Cursos
 app.use('/api/cursos', cursosRoutes);
+
+//Catalogos
+app.use('/api/catalogos', catalogoRoutes);
 
 // Conexión a MongoDB
 mongoose.connect(MONGO_URI)
