@@ -17,3 +17,5 @@ const autenticarEmpleado = (req, res, next) => {
         res.status(401).json({ msg: 'Token inválido' });
     }
 };
+
+module.exports = { autenticarEmpleado };
