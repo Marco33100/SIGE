@@ -2,7 +2,7 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Encabezado -->
         <div class="mb-8">
-            <h2 class="text-2xl font-bold text-gray-900">Visualizar Actividades</h2>
+            <h2 class="text-2xl font-bold text-gray-900"><span class="border-b-4 border-amber-400">Visualizar Actividades</span></h2>
         </div>
 
         <!-- Panel de Filtros -->
@@ -18,7 +18,7 @@
                             class="w-full px-3 py-2 border border-gray-400 rounded-md shadow-md focus:ring-blue-500 focus:border-blue-500">
                             <option value="">Seleccione un estatus</option>
                             <option *ngFor="let estatus of estatusList" [value]="estatus.estatus">
-                                {{ estatus.estatus }}
+                                {{ estatus.estatus === 1 ? 'Participó' : 'No participó' }}
                             </option>
                         </select>
                     </div>
@@ -94,7 +94,7 @@
                                 {{ actividad.descripcionAct }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 border-b">
-                                {{ actividad.estatusActividad }}
+                                {{ mapearEstatus(actividad.estatusActividad) }}
                             </td>
                         </tr>
                     </tbody>

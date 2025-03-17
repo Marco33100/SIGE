@@ -43,19 +43,19 @@ export class VisualizarActividadesComponent implements OnInit {
 
   aplicarFiltros(): void {
     const filtros: any = {};
-  
+
     if (this.filtros.estatusActividad) {
       filtros.estatusActividad = Number(this.filtros.estatusActividad);
     }
-  
+
     if (this.filtros.claveEmpleado) {
       filtros.claveEmpleado = this.filtros.claveEmpleado;
     }
-  
+
     if (this.filtros.nomActividad) {
       filtros.nomActividad = this.filtros.nomActividad;
     }
-    
+
     this.actividadService.visualizarActividadesConFiltros(filtros).subscribe(data => {
       console.log('Datos recibidos del backend:', data);
       this.actividades = data.actividades;
@@ -69,5 +69,10 @@ export class VisualizarActividadesComponent implements OnInit {
       nomActividad: ''
     };
     this.aplicarFiltros();
+  }
+
+  // Función para mapear el estatus
+  mapearEstatus(estatus: number): string {
+    return estatus === 1 ? 'Participó' : 'No participó';
   }
 }

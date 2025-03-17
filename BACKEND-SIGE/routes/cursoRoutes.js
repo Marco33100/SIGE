@@ -17,13 +17,19 @@ const router = express.Router();
 router.post('/agregarCursoEmpleado', async (req, res) => {
     try {
         const { claveEmpleado, nomCurso, fechaInicio, fechaTermino, tipoDocumento, descripcionCurso, especialidad } = req.body;
-        
+
+        // Verificar que el empleado exista
+        const empleadoExiste = await Empleado.findOne({ claveEmpleado });
+        if (!empleadoExiste) {
+            return res.status(404).json({ msg: 'El empleado no existe' });
+        }
+
         // Verificar que el curso exista en el catálogo
         const cursoExiste = await Curso.findOne({ nomCurso });
         if (!cursoExiste) {
             return res.status(404).json({ msg: 'El curso no existe en el catálogo' });
         }
-        
+
         // Verificar que el tipo de documento exista
         if (tipoDocumento) {
             const documentoExiste = await Documento.findOne({ nomDocumento: tipoDocumento });
@@ -31,7 +37,7 @@ router.post('/agregarCursoEmpleado', async (req, res) => {
                 return res.status(404).json({ msg: 'El tipo de documento no existe en el catálogo' });
             }
         }
-        
+
         // Verificar que la especialidad exista
         if (especialidad) {
             const especialidadExiste = await Especialidad.findOne({ nomEspecialidad: especialidad });
@@ -39,7 +45,7 @@ router.post('/agregarCursoEmpleado', async (req, res) => {
                 return res.status(404).json({ msg: 'La especialidad no existe en el catálogo' });
             }
         }
-        
+
         const nuevoCursoEmpleado = new CursoEmpleado({
             claveEmpleado,
             nomCurso,
@@ -49,15 +55,15 @@ router.post('/agregarCursoEmpleado', async (req, res) => {
             descripcionCurso,
             especialidad
         });
-        
+
         await nuevoCursoEmpleado.save();
-        
+
         res.json({
             msg: 'Curso asignado al empleado con éxito',
             curso: nuevoCursoEmpleado,
             empleado: { claveEmpleado }
         });
-        
+
     } catch (error) {
         console.error('Error al agregar curso al empleado:', error);
         res.status(500).json({ msg: 'Error interno del servidor' });
@@ -90,13 +96,13 @@ router.get('/documentos', async (req, res) => {
 router.get('/buscarE/:claveEmpleado', async (req, res) => {
     try {
         const { claveEmpleado } = req.params;
-        
+
         const empleado = await Empleado.findOne({ claveEmpleado });
-        
+
         if (!empleado) {
             return res.status(404).json({ msg: 'Empleado no encontrado' });
         }
-        
+
         res.json(empleado);
     } catch (error) {
         console.error('Error al buscar empleado:', error);
@@ -111,7 +117,7 @@ router.get('/opciones', async (req, res) => {
             { id: 'actividades', nombre: 'Actividades' },
             { id: 'cursos', nombre: 'Cursos' }
         ];
-        
+
         res.json(opciones);
     } catch (error) {
         console.error('Error al obtener opciones:', error);
@@ -123,15 +129,15 @@ router.get('/opciones', async (req, res) => {
 router.get('/visualizarCursosEmpleado/:claveEmpleado', async (req, res) => {
     try {
         const { claveEmpleado } = req.params;
-        
+
         // Verificar que el empleado exista
         const empleadoExiste = await Empleado.findOne({ claveEmpleado });
         if (!empleadoExiste) {
             return res.status(404).json({ msg: 'El empleado no existe' });
         }
-        
+
         const cursos = await CursoEmpleado.find({ claveEmpleado });
-        
+
         res.json(cursos);
     } catch (error) {
         console.error('Error al visualizar cursos del empleado:', error);
@@ -143,13 +149,13 @@ router.get('/visualizarCursosEmpleado/:claveEmpleado', async (req, res) => {
 router.get('/visualizarActividadesEmpleado/:claveEmpleado', async (req, res) => {
     try {
         const { claveEmpleado } = req.params;
-        
+
         const empleadoExiste = await Empleado.findOne({ claveEmpleado });
         if (!empleadoExiste) {
             return res.status(404).json({ msg: 'El empleado no existe' });
         }
         const actividades = await ActividadEmpleado.find({ claveEmpleado });
-        
+
         res.json(actividades);
     } catch (error) {
         console.error('Error al visualizar actividades del empleado:', error);
@@ -168,7 +174,7 @@ router.put('/editarCursoEmpleado/:id', async (req, res) => {
             descripcionCurso,
             especialidad
         } = req.body;
-        
+
         // Verificar que el tipo de documento exista
         if (tipoDocumento) {
             const documentoExiste = await Documento.findOne({ nomDocumento: tipoDocumento });
@@ -197,7 +203,7 @@ router.put('/editarCursoEmpleado/:id', async (req, res) => {
         if (!cursoActualizado) {
             return res.status(404).json({ msg: 'Curso no encontrado' });
         }
-        
+
         res.json({
             msg: 'Curso actualizado con éxito',
             curso: cursoActualizado
@@ -213,31 +219,31 @@ router.put('/editarActividadEmpleado/:id', async (req, res) => {
     try {
         const { id } = req.params;
         const { descripcionAct, estatusActividad } = req.body;
-        
+
         // Verificar que el estatus es válido (0 o 1)
         if (estatusActividad !== undefined) {
             const estatusNum = Number(estatusActividad);
             const estatusValido = [0, 1].includes(estatusNum);
-            
+
             if (!estatusValido) {
-                return res.status(400).json({ 
+                return res.status(400).json({
                     msg: 'El estatus especificado no es válido',
                     estatusIngresado: estatusNum,
                     estatusPermitidos: [0, 1]
                 });
             }
         }
-        
+
         const actividadActualizada = await ActividadEmpleado.findByIdAndUpdate(
             id,
             { descripcionAct, estatusActividad },
             { new: true }
         );
-        
+
         if (!actividadActualizada) {
             return res.status(404).json({ msg: 'Actividad no encontrada' });
         }
-        
+
         res.json({
             msg: 'Actividad actualizada con éxito',
             actividad: actividadActualizada
@@ -252,13 +258,13 @@ router.put('/editarActividadEmpleado/:id', async (req, res) => {
 router.delete('/eliminarCursoEmpleado/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        
+
         const cursoEliminado = await CursoEmpleado.findByIdAndDelete(id);
-        
+
         if (!cursoEliminado) {
             return res.status(404).json({ msg: 'Curso no encontrado' });
         }
-        
+
         res.json({
             msg: 'Curso eliminado con éxito',
             curso: cursoEliminado
@@ -273,13 +279,13 @@ router.delete('/eliminarCursoEmpleado/:id', async (req, res) => {
 router.delete('/eliminarActividadEmpleado/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        
+
         const actividadEliminada = await ActividadEmpleado.findByIdAndDelete(id);
-        
+
         if (!actividadEliminada) {
             return res.status(404).json({ msg: 'Actividad no encontrada' });
         }
-        
+
         res.json({
             msg: 'Actividad eliminada con éxito',
             actividad: actividadEliminada
@@ -300,26 +306,26 @@ router.get('/visualizarCursos', async (req, res) => {
             especialidad,
             claveEmpleado
         } = req.query;
-        
+
         // Construir el filtro
         const filtro = {};
-        
+
         if (fechaInicio) {
             filtro.fechaInicio = { $gte: new Date(fechaInicio) };
         }
-        
+
         if (fechaTermino) {
             filtro.fechaTermino = { $lte: new Date(fechaTermino) };
         }
-        
+
         if (tipoDocumento) {
             filtro.tipoDocumento = tipoDocumento;
         }
-        
+
         if (especialidad) {
             filtro.especialidad = especialidad;
         }
-        
+
         if (claveEmpleado) {
             filtro.claveEmpleado = claveEmpleado;
         }
@@ -345,6 +351,60 @@ router.get('/cursos', async (req, res) => {
     }
 });
 
+
+// endpoint para traer la informacion del empleado
+router.get('/personal/:claveEmpleado', async (req, res) => {
+    try {
+        const { claveEmpleado } = req.params;
+
+        // Validar que se proporcionó una clave de empleado
+        if (!claveEmpleado) {
+            return res.status(400).json({
+                exito: false,
+                mensaje: 'Se requiere la clave de empleado'
+            });
+        }
+
+        // Buscar empleado por clave
+        const empleado = await Empleado.findOne({ claveEmpleado });
+
+        // Verificar si se encontró
+        if (!empleado) {
+            return res.status(404).json({
+                exito: false,
+                mensaje: `No se encontró empleado con la clave: ${claveEmpleado}`
+            });
+        }
+
+        // Devolver solo la información personal del empleado
+        res.status(200).json({
+            exito: true,
+            mensaje: 'Información personal del empleado obtenida con éxito',
+            datosPersonales: {
+                claveEmpleado: empleado.claveEmpleado,
+                nombreEmpleado: empleado.nombreEmpleado,
+                apellidoP: empleado.apellidoP,
+                apellidoM: empleado.apellidoM,
+                fechaNacimiento: empleado.fechaNacimiento,
+                rfc: empleado.rfc,
+                sexo: empleado.sexo,
+                fotoEmpleado: empleado.fotoEmpleado,
+                domicilio: empleado.domicilio,
+                telefono: empleado.telefono,
+                correoElectronico: empleado.correoElectronico,
+                referenciasFamiliares: empleado.referenciasFamiliares
+            }
+        });
+
+    } catch (error) {
+        console.error('Error al consultar información personal:', error);
+        res.status(500).json({
+            exito: false,
+            mensaje: 'Error al obtener la información personal del empleado',
+            error: error.message
+        });
+    }
+});
 
 
 

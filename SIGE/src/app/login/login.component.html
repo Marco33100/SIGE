@@ -1,34 +1,53 @@
-<div class="vh-100 d-flex flex-column">
-    <h1 class="fw-bold text-primary text-center pt-3" style="font-size: 2.5rem;">
+<div class="min-h-screen bg-gradient-to-b from-blue-50 to-blue-100 flex flex-col items-center justify-center p-4">
+    <!-- Título -->
+    <h1 class="text-4xl font-bold text-blue-800 mb-8 animate-fade-in">
         GM Industries
     </h1>
-    
-    <div class="container-fluid flex-grow-1 d-flex align-items-center justify-content-center">
-        <div class="row d-flex justify-content-center align-items-center w-100">
-            <div class="col-md-11 col-lg-4 col-xl-5">
-                <img src="https://elmatecreativos.com/wp-content/uploads/2014/06/logo_grupor.jpg"
-                    class="img-fluid" alt="Sample image">
-            </div>
-            <div class="col-md-8 col-lg-6 col-xl-4 offset-xl-1">
-                <form>
-                    <div data-mdb-input-init class="form-outline mb-3">
-                        <input type="text" id="form3Example3" class="form-control form-control-lg"
-                            placeholder="Ingresa tu usuario" [(ngModel)]="username" name="username" />
-                        <label class="form-label" for="form3Example3">Clave Usuario</label>
-                    </div>
 
-                    <div data-mdb-input-init class="form-outline mb-2">
-                        <input type="password" id="form3Example4" class="form-control form-control-lg"
-                            placeholder="Ingresa tu contraseña" [(ngModel)]="password" name="password" />
-                        <label class="form-label" for="form3Example4">Contraseña</label>
-                    </div>
+    <!-- Contenedor del formulario e imagen -->
+    <div class="bg-white rounded-xl shadow-2xl overflow-hidden max-w-4xl w-full flex flex-col md:flex-row animate-slide-up">
+        <!-- Imagen -->
+        <div class="md:w-1/2 p-8 flex items-center justify-center bg-blue-50">
+            <img src="https://elmatecreativos.com/wp-content/uploads/2014/06/logo_grupor.jpg"
+                 class="w-full h-auto max-w-xs rounded-lg shadow-md transition-transform duration-300 hover:scale-105"
+                 alt="GM Industries Logo">
+        </div>
 
-                    <div class="text-center text-lg-start mt-4 pt-2">
-                        <button type="button" data-mdb-button-init data-mdb-ripple-init class="btn btn-primary btn-lg"
-                            style="padding-left: 2.5rem; padding-right: 2.5rem;" (click)="onLogin()">Entrar</button>
-                    </div>
-                </form>
-            </div>
+        <!-- Formulario -->
+        <div class="md:w-1/2 p-8">
+            <form class="space-y-6">
+                <!-- Campo de usuario -->
+                <div>
+                    <label for="username" class="block text-sm font-medium text-gray-700">Clave Usuario</label>
+                    <input type="text" id="username" [(ngModel)]="username" name="username"
+                           class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                           placeholder="Ingresa tu usuario">
+                </div>
+
+                <!-- Campo de contraseña -->
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-700">Contraseña</label>
+                    <input type="password" id="password" [(ngModel)]="password" name="password"
+                           class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                           placeholder="Ingresa tu contraseña">
+                </div>
+
+                <!-- Mensajes de error y éxito -->
+                <div *ngIf="errorMessage" class="text-red-500 text-sm text-center">
+                    {{ errorMessage }}
+                </div>
+                <div *ngIf="successMessage" class="text-green-500 text-sm text-center">
+                    {{ successMessage }}
+                </div>
+
+                <!-- Botón de inicio de sesión -->
+                <div class="flex justify-center">
+                    <button type="button" (click)="onLogin()"
+                            class="px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors">
+                        Entrar
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>

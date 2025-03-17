@@ -49,8 +49,7 @@ export class AgregarActividadesComponent implements OnInit {
     // Verifica si todos los campos están llenos
     if (!this.actividad.claveEmpleado || 
         !this.actividad.nomActividad || 
-        !this.actividad.descripcionAct || 
-        !this.actividad.estatusActividad) {
+        !this.actividad.descripcionAct) {
       
       Swal.fire({
         icon: 'warning',
@@ -109,4 +108,9 @@ export class AgregarActividadesComponent implements OnInit {
       estatusActividad: 0
     };
   }
+
+    // Función para mapear el estatus
+    mapearEstatus(estatus: number): string {
+      return estatus === 1 ? 'Participó' : 'No participó';
+    }
 }
