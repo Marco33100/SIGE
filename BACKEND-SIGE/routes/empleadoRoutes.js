@@ -1,8 +1,10 @@
 const express = require('express');
 const Empleado = require('../models/Empleado');
 const jwt = require('jsonwebtoken');
+const { autenticarEmpleado } = require('../middleware/authMiddleware');
 
 const router = express.Router();
+exports.router = router;
 
 
 // CU01: Inicio de sesión
@@ -447,7 +449,6 @@ router.get('/listar', async (req, res) => {
     }
 });
 
-
 // Ruta para obtener los detalles completos de un empleado específico
 router.get('/:claveEmpleado', async (req, res) => {
     try {
@@ -659,5 +660,6 @@ router.delete('/:claveEmpleado', async (req, res) => {
         });
     }
 });
+
 
 module.exports = router;

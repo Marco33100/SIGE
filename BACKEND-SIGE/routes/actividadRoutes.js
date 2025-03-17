@@ -3,6 +3,8 @@ const ActividadEmpleado = require('../models/ActividadesEmpleado');
 const Actividad = require('../models/Actividad');
 const Estatus = require('../models/Estatus');
 const Empleado = require('../models/Empleado');
+const { autenticarEmpleado } = require('../middleware/authMiddleware');
+
 
 
 const router = express.Router();
@@ -98,6 +100,37 @@ router.get('/visualizarActividades', async (req, res) => {
             ? await ActividadEmpleado.find()
             : await ActividadEmpleado.find({ $or: filtro });
         
+        res.json({
+            total: actividades.length,
+            actividades
+        });
+    } catch (error) {
+        console.error('Error al visualizar actividades:', error);
+        res.status(500).json({ msg: 'Error interno del servidor' });
+    }
+});
+
+
+// CU09: Visualizar actividades con filtros (solo para el empleado autenticado)
+router.get('/visualizarActividadesE', autenticarEmpleado, async (req, res) => {
+    try {
+        const { estatusActividad, nomActividad } = req.query;
+        const claveEmpleado = req.claveEmpleado; // Obtener la clave del empleado autenticado
+
+        // Construir el filtro
+        const filtro = { claveEmpleado }; // Solo actividades del empleado autenticado
+
+        if (estatusActividad !== undefined && estatusActividad !== '') {
+            filtro.estatusActividad = Number(estatusActividad);
+        }
+
+        if (nomActividad && nomActividad !== '') {
+            filtro.nomActividad = nomActividad;
+        }
+
+        // Buscar actividades con el filtro
+        const actividades = await ActividadEmpleado.find(filtro);
+
         res.json({
             total: actividades.length,
             actividades

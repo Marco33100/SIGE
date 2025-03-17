@@ -6,8 +6,8 @@ const Documento = require('../models/Documento');
 const Especialidad = require('../models/Especialidad');
 const Empleado = require('../models/Empleado');
 const ActividadEmpleado = require('../models/ActividadesEmpleado');
-const Actividad = require('../models/Actividad');
-const Estatus = require('../models/Estatus');
+const { autenticarEmpleado } = require('../middleware/authMiddleware');
+
 
 
 const router = express.Router();
@@ -339,6 +339,45 @@ router.get('/visualizarCursos', async (req, res) => {
         res.status(500).json({ msg: 'Error interno del servidor' });
     }
 });
+
+// CU08: Visualizar cursos con filtros (solo para el empleado autenticado)
+router.get('/visualizarCursosE', autenticarEmpleado, async (req, res) => {
+    try {
+        const { fechaInicio, fechaTermino, tipoDocumento, especialidad } = req.query;
+        const claveEmpleado = req.claveEmpleado; // Obtener la clave del empleado autenticado
+
+        // Construir el filtro
+        const filtro = { claveEmpleado };
+
+        if (fechaInicio) {
+            filtro.fechaInicio = { $gte: new Date(fechaInicio) };
+        }
+
+        if (fechaTermino) {
+            filtro.fechaTermino = { $lte: new Date(fechaTermino) };
+        }
+
+        if (tipoDocumento) {
+            filtro.tipoDocumento = tipoDocumento;
+        }
+
+        if (especialidad) {
+            filtro.especialidad = especialidad;
+        }
+
+        // Buscar cursos con el filtro
+        const cursos = await CursoEmpleado.find(filtro);
+
+        res.json({
+            total: cursos.length,
+            cursos
+        });
+    } catch (error) {
+        console.error('Error al visualizar cursos:', error);
+        res.status(500).json({ msg: 'Error interno del servidor' });
+    }
+});
+
 
 // Obtener lista de cursos disponibles
 router.get('/cursos', async (req, res) => {
