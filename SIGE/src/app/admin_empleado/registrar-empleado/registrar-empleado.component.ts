@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { EmpleadoService } from '../../../services/empleados.service';
 
@@ -24,30 +24,33 @@ export class RegistrarEmpleadoComponent {
     private router: Router
   ) {
     this.empleadoForm = this.fb.group({
-      nombreEmpleado: [''],
-      apellidoP: [''],
+      nombreEmpleado: ['', Validators.required],
+      apellidoP: ['', Validators.required],
       apellidoM: [''],
-      contraseña: [''],
-      confirmarContraseña: [''],
-      fechaNacimiento: [''],
-      sexo: [''],
+      contraseña: ['', Validators.required],
+      confirmarContraseña: ['', Validators.required],
+      fechaNacimiento: ['', Validators.required],
+      sexo: ['', Validators.required],
       fotoEmpleado: [''],
       rfc: [''],
-      departamento: [''],
-      puesto: [''],
-      rol: [''],
+      departamento: ['', Validators.required],
+      puesto: ['', Validators.required],
+      rol: ['', Validators.required],
+      telefono: this.fb.array([]),
+      correoElectronico: this.fb.array([]),
+      referenciasFamiliares: this.fb.array([]),
       domicilio: this.fb.group({
-        calle: [''],
+        calle: ['', Validators.required],
         numInterior: [''],
         numExterior: [''],
-        colonia: [''],
-        codigoPostal: [''],
-        ciudad: ['']
+        colonia: ['', Validators.required],
+        codigoPostal: ['', Validators.required],
+        ciudad: ['', Validators.required]
       })
     });
   }
 
-  // Method to handle file input change for employee photo
+  // Método para manejar el cambio de archivo para la foto del empleado
   onFileChange(event: any): void {
     const file = event.target.files[0];
     if (file) {
@@ -62,13 +65,19 @@ export class RegistrarEmpleadoComponent {
     }
   }
 
-  // Submit the form
+  // Enviar el formulario
   onSubmit(): void {
+    // Verificar si las contraseñas coinciden
+    if (this.empleadoForm.value.contraseña !== this.empleadoForm.value.confirmarContraseña) {
+      this.errorMessage = 'Las contraseñas no coinciden';
+      return;
+    }
+
     this.submitted = true;
     this.errorMessage = '';
     this.successMessage = '';
 
-    // Remove confirmarContraseña from the data to be sent
+    // Eliminar confirmarContraseña de los datos a enviar
     const formData = { ...this.empleadoForm.value };
     delete formData.confirmarContraseña;
 
@@ -89,4 +98,8 @@ export class RegistrarEmpleadoComponent {
       }
     );
   }
+  get passwordsMismatch(): boolean {
+    return this.empleadoForm.get('contraseña')?.value !== 
+           this.empleadoForm.get('confirmarContraseña')?.value;
+}
 }
