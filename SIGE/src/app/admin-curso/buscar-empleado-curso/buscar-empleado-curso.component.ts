@@ -4,7 +4,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormsModule } from '@angular/forms';
 import Swal from 'sweetalert2';
-import { switchMap } from 'rxjs/operators'; // Importa switchMap
+import { switchMap } from 'rxjs/operators';
 
 
 @Component({

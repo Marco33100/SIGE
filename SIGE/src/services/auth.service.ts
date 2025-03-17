@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { tap } from 'rxjs/operators'; // Necesario para realizar acciones secundarias
+import { tap } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -11,33 +11,52 @@ export class AuthService {
 
   constructor(private http: HttpClient) { }
 
+  // Método para iniciar sesión
   login(username: string, password: string): Observable<any> {
     const body = { claveEmpleado: username, contraseña: password };
     return this.http.post<any>(this.apiUrl, body).pipe(
       tap(response => {
-        // Verifica que la respuesta tenga el rol y guárdalo en localStorage
-        if (response.empleado && response.empleado.rol) {
+        // Guardar el token y el rol en el localStorage
+        if (response.token && response.empleado) {
+          this.setToken(response.token);
           this.setRolUsuario(response.empleado.rol);
         }
       })
     );
   }
 
-  // Guarda el rol del usuario en el localStorage
+  // Guardar el token en el localStorage
+  setToken(token: string): void {
+    localStorage.setItem('authToken', token);
+  }
+
+  // Obtener el token desde el localStorage
+  getToken(): string | null {
+    return localStorage.getItem('authToken');
+  }
+
+  // Guardar el rol del usuario en el localStorage
   setRolUsuario(rol: number): void {
     localStorage.setItem('usuarioRol', rol.toString());
-    console.log('Rol guardado en localStorage:', rol); // Verifica que el rol se guarda
   }
 
-  // Recupera el rol del usuario desde el localStorage
+  // Obtener el rol del usuario desde el localStorage
   getRolUsuario(): number {
     const rol = localStorage.getItem('usuarioRol');
-    return rol ? parseInt(rol, 10) : 0; // Devuelve 0 si no se encuentra en el localStorage
+    return rol ? parseInt(rol, 10) : 0; // Devuelve 0 si no se encuentra
   }
 
-  // Elimina el rol del usuario del localStorage al cerrar sesión
+  // Eliminar el token y el rol al cerrar sesión
   logout(): void {
+    localStorage.removeItem('authToken');
     localStorage.removeItem('usuarioRol');
-    console.log('Rol eliminado de localStorage');
+  }
+
+  // Método para crear headers con el token
+  getAuthHeaders(): HttpHeaders {
+    const token = this.getToken();
+    return new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
   }
 }

@@ -50,16 +50,17 @@ export class LoginComponent implements OnInit {
       response => {
         console.log('Login exitoso', response);
 
-        // Guardamos el rol del usuario en el localStorage
-        if (response.empleado && response.empleado.rol) {
+        // Guardar el token y el rol en el localStorage
+        if (response.token && response.empleado) {
+          this.authService.setToken(response.token);
           this.authService.setRolUsuario(response.empleado.rol);
         }
 
         this.successMessage = response.msg;
-        this.router.navigate(['/home']);
+        this.router.navigate(['/home']); // Redirigir al home después del login
       },
       error => {
-        this.errorMessage = error.error.message || 'Error en el login';
+        this.errorMessage = error.error.msg || 'Error en el login';
         console.error('Error en el login', error);
 
         // Animación de error (opcional)
