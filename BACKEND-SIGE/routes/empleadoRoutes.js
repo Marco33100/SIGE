@@ -1,7 +1,9 @@
 const express = require('express');
 const Empleado = require('../models/Empleado');
+const jwt = require('jsonwebtoken');
 
 const router = express.Router();
+
 
 // CU01: Inicio de sesión
 router.post('/login', async (req, res) => {
@@ -37,10 +39,18 @@ router.post('/login', async (req, res) => {
             });
         }
         
-        // Credenciales válidas - Devolver información del empleado
+        // Credenciales válidas - Generar un token JWT
+        const token = jwt.sign(
+            { claveEmpleado: empleado.claveEmpleado }, // Payload
+            '1294748329274929MA2827739028', // Clave secreta (debe ser segura y almacenada en variables de entorno)
+            { expiresIn: '1h' } // Tiempo de expiración del token
+        );
+        
+        // Devolver el token y la información del empleado
         res.status(200).json({
             exito: true,
             msg: 'Login exitoso',
+            token, // Enviar el token al frontend
             empleado: {
                 claveEmpleado: empleado.claveEmpleado,
                 nombreEmpleado: empleado.nombreEmpleado,
