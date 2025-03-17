@@ -1,0 +1,89 @@
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Encabezado -->
+        <div class="mb-8">
+            <h2 class="text-2xl font-bold text-gray-900"><span class="border-b-4 border-amber-400">Mis Actividades</span></h2>
+        </div>
+
+        <!-- Panel de Filtros -->
+        <div class="bg-white border border-gray-300 rounded-lg shadow-xl mb-8">
+            <div class="p-6">
+                <form (ngSubmit)="aplicarFiltros()" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Estatus -->
+                    <div>
+                        <label for="estatusActividad" class="block text-sm font-medium text-gray-700 mb-2">
+                            Estatus
+                        </label>
+                        <select id="estatusActividad" [(ngModel)]="filtros.estatusActividad" name="estatusActividad"
+                            class="w-full px-3 py-2 border border-gray-400 rounded-md shadow-md focus:ring-blue-500 focus:border-blue-500">
+                            <option value="">Seleccione un estatus</option>
+                            <option *ngFor="let estatus of estatusList" [value]="estatus.estatus">
+                                {{ estatus.estatus === 1 ? 'Participó' : 'No participó' }}
+                            </option>
+                        </select>
+                    </div>
+
+                    <!-- Nombre Actividad -->
+                    <div>
+                        <label for="nomActividad" class="block text-sm font-medium text-gray-700 mb-2">
+                            Nombre Actividad
+                        </label>
+                        <select id="nomActividad" [(ngModel)]="filtros.nomActividad" name="nomActividad"
+                            class="w-full px-3 py-2 border border-gray-400 rounded-md shadow-md focus:ring-blue-500 focus:border-blue-500">
+                            <option value="">Seleccione una actividad</option>
+                            <option *ngFor="let actividad of actividadesList" [value]="actividad.nomActividad">
+                                {{ actividad.nomActividad }}
+                            </option>
+                        </select>
+                    </div>
+
+                    <!-- Botones de acción -->
+                    <div class="flex items-end space-x-4">
+                        <button type="submit"
+                            class="px-4 py-2 bg-green-600 text-white rounded-md shadow-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors">
+                            Aplicar Filtros
+                        </button>
+                        <button type="button" (click)="limpiarFiltros()"
+                            class="px-4 py-2 bg-blue-100 text-gray-700 rounded-md shadow-lg hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors">
+                            Limpiar Filtros
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Tabla de Actividades -->
+        <div class="bg-white border border-gray-300 rounded-lg shadow-xl overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-300 shadow-md">
+                    <thead class="bg-gray-100">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border-b">
+                                Nombre Actividad
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border-b">
+                                Descripción
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border-b">
+                                Estatus
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <tr *ngFor="let actividad of actividades" class="hover:bg-gray-50 transition-colors shadow-sm">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 border-b">
+                                {{ actividad.nomActividad }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 border-b">
+                                {{ actividad.descripcionAct }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 border-b">
+                                {{ mapearEstatus(actividad.estatusActividad) }}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

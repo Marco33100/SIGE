@@ -10,6 +10,9 @@ import { AgregarCursosComponent } from './admin-curso/agregar-cursos/agregar-cur
 import { BuscarEmpleadoCursoComponent } from './admin-curso/buscar-empleado-curso/buscar-empleado-curso.component';
 import { VisualizarActividadesComponent } from './admin-curso/visualizar-actividades/visualizar-actividades.component';
 import { VisualizarCursosComponent } from './admin-curso/visualizar-cursos/visualizar-cursos.component';
+import { MisActividadesComponent } from './empleado/mis-actividades/mis-actividades.component';
+import { MisCursosComponent } from './empleado/mis-cursos/mis-cursos.component';
+import { AgregarCursoComponent } from './empleado/agregar-curso/agregar-curso.component';
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
   {
@@ -20,11 +23,16 @@ export const routes: Routes = [
       { path: 'registrar-empleado', component: RegistrarEmpleadoComponent },
       { path: 'buscar-empleado', component: BuscarEmpleadoComponent },
       { path: 'listar-empleado', component: ListarEmpleadoComponent }, // Aquí está la ruta correcta
+      //Seccion del admin de cursos
       {path: 'agregar-actividad', component: AgregarActividadesComponent},
       {path: 'agregar-curso', component: AgregarCursosComponent},
       {path: 'buscar-empleadoCA', component: BuscarEmpleadoCursoComponent},
       {path: 'visualizar-actividad', component: VisualizarActividadesComponent},
       {path: 'visualizar-curso', component: VisualizarCursosComponent},
+      //Seccion del empleado
+      {path: 'mis-actividades', component: MisActividadesComponent},
+      {path: 'mis-cursos', component:MisCursosComponent},
+      {path: 'agregar-cursos', component:AgregarCursoComponent}
     ]
   },
   { path: '', redirectTo: '/login', pathMatch: 'full' }
