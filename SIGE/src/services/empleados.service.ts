@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { from, Observable } from 'rxjs';
-import { ApiResponse, Empleado, FiltrosEmpleado } from '../app/interfaces/empleado.interface'
+import { ApiResponse, Empleado, FiltrosEmpleado } from '../app/interface/empleado.interface'
 
 @Injectable({
   providedIn: 'root'

@@ -4,7 +4,7 @@ import { CatalogosService } from '../../../services/catalogos.service';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { NgxPaginationModule } from 'ngx-pagination';
-import { ApiResponse, FiltrosEmpleado, Empleado } from '../../interfaces/empleado.interface';
+import { ApiResponse, FiltrosEmpleado, Empleado } from '../../interface/empleado.interface';
 import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
