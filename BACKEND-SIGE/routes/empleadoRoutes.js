@@ -61,13 +61,14 @@ router.post('/login', async (req, res) => {
 });
 
 // CU02: Registrar un nuevo empleado
-router.post('/empleados', async (req, res) => {
+router.post('/registrar', async (req, res) => {
     try {
         // Validar campos obligatorios según el esquema
         const camposObligatorios = [
-            'claveEmpleado', 'nombreEmpleado', 'apellidoP', 'contraseña',
+            'nombreEmpleado', 'apellidoP', 'contraseña',
             'fechaNacimiento', 'sexo', 'departamento', 'puesto', 'rol'
         ];
+        // Nota: quitamos 'claveEmpleado' de los campos obligatorios ya que lo generaremos automáticamente
         
         const camposFaltantes = camposObligatorios.filter(campo => !req.body[campo]);
         
@@ -98,27 +99,78 @@ router.post('/empleados', async (req, res) => {
             });
         }
         
-        // Verificar si la clave de empleado ya existe
-        const empleadoExistente = await Empleado.findOne({ 
-            claveEmpleado: req.body.claveEmpleado 
-        });
+        // Generar clave de empleado (RASG-001)
+        const nombreCompleto = req.body.nombreEmpleado.split(' ');
+        let iniciales = '';
         
-        if (empleadoExistente) {
-            return res.status(409).json({
-                exito: false,
-                mensaje: `La clave de empleado "${req.body.claveEmpleado}" ya está en uso`
-            });
+        // Obtener iniciales del nombre (todos los nombres)
+        for (let i = 0; i < nombreCompleto.length; i++) {
+            iniciales += nombreCompleto[i].charAt(0);
         }
+        
+        // Añadir inicial de apellido paterno
+        iniciales += req.body.apellidoP.charAt(0);
+        
+        // Añadir inicial de apellido materno si existe
+        if (req.body.apellidoM && req.body.apellidoM.length > 0) {
+            iniciales += req.body.apellidoM.charAt(0);
+        }
+        
+        iniciales = iniciales.toUpperCase();
+        
+        // Buscar el último consecutivo para esta combinación de iniciales
+        const ultimoEmpleado = await Empleado.findOne(
+            { claveEmpleado: new RegExp(`^${iniciales}-\\d+$`) },
+            {},
+            { sort: { claveEmpleado: -1 } }
+        );
+        
+        let consecutivo = 1;
+        if (ultimoEmpleado) {
+            // Extraer el número consecutivo actual y aumentarlo en 1
+            const partes = ultimoEmpleado.claveEmpleado.split('-');
+            consecutivo = parseInt(partes[1]) + 1;
+        }
+        
+        // Formatear el consecutivo a 3 dígitos (001, 002, etc.)
+        const consecutivoStr = consecutivo.toString().padStart(3, '0');
+        const claveEmpleado = `${iniciales}-${consecutivoStr}`;
+        
+        // Generar RFC (SIGR-770910) - primeras letras de apellidos y nombre + fecha nacimiento
+        let rfc = '';
+        
+        // Primeras dos letras del apellido paterno
+        if (req.body.apellidoP.length >= 2) {
+            rfc += req.body.apellidoP.substring(0, 2).toUpperCase();
+        } else {
+            rfc += req.body.apellidoP.toUpperCase();
+        }
+        
+        // Primera letra del apellido materno
+        if (req.body.apellidoM && req.body.apellidoM.length > 0) {
+            rfc += req.body.apellidoM.charAt(0).toUpperCase();
+        }
+        
+        // Primera letra del nombre
+        rfc += req.body.nombreEmpleado.charAt(0).toUpperCase();
+        
+        // Fecha de nacimiento en formato YYMMDD
+        const fechaNac = new Date(req.body.fechaNacimiento);
+        const anio = fechaNac.getFullYear().toString().substr(-2);
+        const mes = (fechaNac.getMonth() + 1).toString().padStart(2, '0');
+        const dia = fechaNac.getDate().toString().padStart(2, '0');
+        
+        rfc += `-${anio}${mes}${dia}`;
         
         // Preparar objeto completo de empleado
         const empleadoData = {
-            claveEmpleado: req.body.claveEmpleado,
+            claveEmpleado: claveEmpleado, // Clave generada automáticamente
             nombreEmpleado: req.body.nombreEmpleado,
             apellidoP: req.body.apellidoP,
             apellidoM: req.body.apellidoM || '',
             contraseña: req.body.contraseña,
             // fechaAlta se generará automáticamente con Date.now() por el esquema
-            rfc: req.body.rfc || '',
+            rfc: req.body.rfc || rfc, // Usar el RFC generado si no se proporciona
             fechaNacimiento: req.body.fechaNacimiento,
             sexo: req.body.sexo,
             fotoEmpleado: req.body.fotoEmpleado || '',
@@ -172,6 +224,7 @@ router.post('/empleados', async (req, res) => {
                 puesto: nuevoEmpleado.puesto,
                 fechaAlta: nuevoEmpleado.fechaAlta,
                 rol: nuevoEmpleado.rol,
+                rfc: nuevoEmpleado.rfc,
                 datos: nuevoEmpleado // Incluir todos los datos para verificación
             }
         });
@@ -195,41 +248,80 @@ router.post('/empleados', async (req, res) => {
     }
 });
 
-
-// CU03: Buscar empleado para gestionar - autocompletado solo por clave
-router.get('/empleados/buscar', async (req, res) => {
+// CU03: Búsqueda progresiva de empleados por clave (autocompletado)
+router.get('/buscar', async (req, res) => {
     try {
         const { termino } = req.query;
         
-        // Validar que se proporcionó un término de búsqueda
-        if (!termino) {
+        // Validar término de búsqueda
+        if (!termino || termino.length < 1) {
             return res.status(400).json({
                 exito: false,
-                mensaje: 'Se requiere un término de búsqueda'
+                mensaje: 'Debe ingresar al menos un carácter para buscar'
             });
         }
         
-        // Crear expresión regular para búsqueda progresiva 
-        // que coincida con el patrón desde el inicio de la clave
-        const regex = new RegExp(`^${termino}`, 'i');
+        // Escapar caracteres especiales en el término de búsqueda
+        const terminoLimpio = termino.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         
-        // Buscar empleados que coincidan con el patrón solo en claveEmpleado
-        const empleados = await Empleado.find({
-            claveEmpleado: regex
-        }).limit(10); // Limitar resultados para mejor rendimiento
+        // Crear expresión regular para búsqueda progresiva
+        // Aquí está el cambio - usamos el patrón directamente en $regex sin crear un objeto RegExp
+        const patronBusqueda = `(?=.*${terminoLimpio.split('').join(')(?=.*')})`;
         
-        // Mapear resultados para devolver solo la información necesaria
-        const resultados = empleados.map(emp => ({
-            claveEmpleado: emp.claveEmpleado,
-            nombreCompleto: `${emp.nombreEmpleado} ${emp.apellidoP} ${emp.apellidoM || ''}`,
-            departamento: emp.departamento,
-            puesto: emp.puesto
-        }));
+        // Pipeline de agregación para búsqueda progresiva
+        const resultados = await Empleado.aggregate([
+            {
+                $match: {
+                    claveEmpleado: {
+                        // Corrección: usar el patrón como string y opciones separadas
+                        $regex: patronBusqueda,
+                        $options: 'i'
+                    }
+                }
+            },
+            {
+                $project: {
+                    claveEmpleado: 1,
+                    nombreCompleto: {
+                        $concat: [
+                            "$nombreEmpleado",
+                            " ",
+                            "$apellidoP",
+                            " ",
+                            { $ifNull: ["$apellidoM", ""] }
+                        ]
+                    },
+                    departamento: 1,
+                    puesto: 1,
+                    coincidencia: {
+                        $indexOfCP: [
+                            { $toLower: "$claveEmpleado" },
+                            { $toLower: termino }
+                        ]
+                    }
+                }
+            },
+            {
+                $sort: {
+                    coincidencia: 1,  // Primero los que empiezan con el término
+                    claveEmpleado: 1  // Orden alfabético
+                }
+            },
+            {
+                $limit: 10  // Limitar resultados para autocompletado
+            },
+            {
+                $project: {
+                    coincidencia: 0  // Eliminar campo temporal
+                }
+            }
+        ]);
         
-        // Devolver los resultados encontrados
         res.status(200).json({
             exito: true,
-            mensaje: `Se encontraron ${resultados.length} empleados`,
+            mensaje: resultados.length > 0
+                ? 'Resultados encontrados'
+                : 'No se encontraron coincidencias',
             total: resultados.length,
             empleados: resultados
         });
@@ -238,14 +330,116 @@ router.get('/empleados/buscar', async (req, res) => {
         console.error('Error en búsqueda de empleados:', error);
         res.status(500).json({
             exito: false,
-            mensaje: 'Error al buscar empleados',
+            mensaje: 'Error en el servidor al realizar la búsqueda',
             error: error.message
         });
     }
 });
 
+// CU04: Listar empleados con datos importantes 
+router.get('/listar', async (req, res) => {
+    try {
+        // Opcionalmente se pueden agregar parámetros de paginación
+        const { page = 1, limit = 10 } = req.query;
+        const skip = (page - 1) * limit;
+        
+        // Obtener los parámetros de filtro
+        const {
+            ciudad,
+            sexo,
+            puesto,
+            departamento,
+            nombre,
+            apellidoP,
+            apellidoM,
+            fechaNacimiento,
+            fechaAlta,
+            rol
+        } = req.query;
+        
+        // Construir el objeto de filtro
+        const filtro = {};
+        
+        // Agregar filtros solo si están presentes
+        if (ciudad && ciudad !== '') filtro['domicilio.ciudad'] = ciudad;
+        if (sexo && sexo !== '') filtro.sexo = sexo;
+        if (puesto && puesto !== '') filtro.puesto = puesto;
+        if (departamento && departamento !== '') filtro.departamento = departamento;
+        if (rol && rol !== '') filtro.rol = parseInt(rol);
+        
+        // Filtros de nombre
+        if (nombre && nombre !== '') {
+            filtro.nombreEmpleado = { $regex: nombre, $options: 'i' }; // Búsqueda insensible a mayúsculas/minúsculas
+        }
+        
+        if (apellidoP && apellidoP !== '') {
+            filtro.apellidoP = { $regex: apellidoP, $options: 'i' };
+        }
+        
+        if (apellidoM && apellidoM !== '') {
+            filtro.apellidoM = { $regex: apellidoM, $options: 'i' };
+        }
+        
+        // Filtros de fecha
+        if (fechaNacimiento && fechaNacimiento !== '') {
+            // Convertir la fecha de string a Date para comparar
+            const fecha = new Date(fechaNacimiento);
+            filtro.fechaNacimiento = { $gte: fecha, $lt: new Date(fecha.getTime() + 86400000) }; // +1 día en ms
+        }
+        
+        if (fechaAlta && fechaAlta !== '') {
+            // Convertir la fecha de string a Date para comparar
+            const fecha = new Date(fechaAlta);
+            filtro.fechaAlta = { $gte: fecha, $lt: new Date(fecha.getTime() + 86400000) }; // +1 día en ms
+        }
+        
+        console.log('Aplicando filtros:', filtro);
+        
+        // Buscar empleados con paginación y filtros
+        const empleados = await Empleado.find(filtro)
+            .skip(skip)
+            .limit(parseInt(limit))
+            .sort({ claveEmpleado: 1 }); // Ordenar por clave de empleado
+        
+        // Contar total de empleados para paginación (con filtros aplicados)
+        const total = await Empleado.countDocuments(filtro);
+        
+        // Mapear solo los datos importantes para la lista
+        const listaEmpleados = empleados.map(emp => ({
+            claveEmpleado: emp.claveEmpleado,
+            nombreCompleto: `${emp.nombreEmpleado} ${emp.apellidoP} ${emp.apellidoM || ''}`,
+            departamento: emp.departamento,
+            puesto: emp.puesto,
+            fechaAlta: emp.fechaAlta,
+            correoElectronico: emp.correoElectronico[0] || '',
+            telefono: emp.telefono[0] || '',
+            rol: emp.rol,
+            activo: emp.activo
+        }));
+        
+        // Devolver resultados
+        res.status(200).json({
+            exito: true,
+            mensaje: 'Lista de empleados obtenida con éxito',
+            total,
+            pagina: parseInt(page),
+            totalPaginas: Math.ceil(total / limit),
+            empleados: listaEmpleados
+        });
+        
+    } catch (error) {
+        console.error('Error al listar empleados:', error);
+        res.status(500).json({
+            exito: false,
+            mensaje: 'Error al obtener la lista de empleados',
+            error: error.message
+        });
+    }
+});
+
+
 // Ruta para obtener los detalles completos de un empleado específico
-router.get('/empleados/:claveEmpleado', async (req, res) => {
+router.get('/:claveEmpleado', async (req, res) => {
     try {
         const { claveEmpleado } = req.params;
         
@@ -303,57 +497,9 @@ router.get('/empleados/:claveEmpleado', async (req, res) => {
     }
 });
 
-// CU04: Listar empleados con datos importantes
-router.get('/empleados/listar', async (req, res) => {
-    try {
-        // Opcionalmente se pueden agregar parámetros de paginación
-        const { page = 1, limit = 10 } = req.query;
-        const skip = (page - 1) * limit;
-        
-        // Buscar empleados con paginación
-        const empleados = await Empleado.find()
-            .skip(skip)
-            .limit(parseInt(limit))
-            .sort({ claveEmpleado: 1 }); // Ordenar por clave de empleado
-        
-        // Contar total de empleados para paginación
-        const total = await Empleado.countDocuments();
-        
-        // Mapear solo los datos importantes para la lista
-        const listaEmpleados = empleados.map(emp => ({
-            claveEmpleado: emp.claveEmpleado,
-            nombreCompleto: `${emp.nombreEmpleado} ${emp.apellidoP} ${emp.apellidoM || ''}`,
-            departamento: emp.departamento,
-            puesto: emp.puesto,
-            fechaAlta: emp.fechaAlta,
-            correoElectronico: emp.correoElectronico[0] || '',
-            telefono: emp.telefono[0] || '',
-            rol: emp.rol,
-            activo: emp.activo
-        }));
-        
-        // Devolver resultados
-        res.status(200).json({
-            exito: true,
-            mensaje: 'Lista de empleados obtenida con éxito',
-            total,
-            pagina: parseInt(page),
-            totalPaginas: Math.ceil(total / limit),
-            empleados: listaEmpleados
-        });
-        
-    } catch (error) {
-        console.error('Error al listar empleados:', error);
-        res.status(500).json({
-            exito: false,
-            mensaje: 'Error al obtener la lista de empleados',
-            error: error.message
-        });
-    }
-});
 
 // CU10: Editar datos del empleado
-router.put('/empleados/:claveEmpleado', async (req, res) => {
+router.put('/:claveEmpleado', async (req, res) => {
     try {
         const { claveEmpleado } = req.params;
         const datosActualizados = req.body;
@@ -401,7 +547,7 @@ router.put('/empleados/:claveEmpleado', async (req, res) => {
 });
 
 // CU11: Consultar información personal del empleado
-router.get('/empleados/personal/:claveEmpleado', async (req, res) => {
+router.get('/personal/:claveEmpleado', async (req, res) => {
     try {
         const { claveEmpleado } = req.params;
         
@@ -455,7 +601,7 @@ router.get('/empleados/personal/:claveEmpleado', async (req, res) => {
 });
 
 // CU12: Eliminar empleados
-router.delete('/empleados/:claveEmpleado', async (req, res) => {
+router.delete('/:claveEmpleado', async (req, res) => {
     try {
         const { claveEmpleado } = req.params;
         

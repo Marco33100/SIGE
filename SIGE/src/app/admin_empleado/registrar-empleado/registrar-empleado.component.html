@@ -1,1 +1,165 @@
-<p>registrar-empleado works!</p>
+<div class="p-4 bg-gray-50">
+    <h2 class="text-xl font-bold mb-4">Registrar Nuevo Empleado</h2>
+    
+    <div *ngIf="successMessage" class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4">
+      {{ successMessage }}
+    </div>
+    
+    <div *ngIf="errorMessage" class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4">
+      {{ errorMessage }}
+    </div>
+    
+    <form [formGroup]="empleadoForm" (ngSubmit)="onSubmit()">
+      <!-- Datos Personales -->
+      <div class="bg-white p-4 rounded shadow mb-4">
+        <h3 class="text-lg font-semibold mb-3">Datos Personales</h3>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+          <div>
+            <label for="nombreEmpleado" class="block text-sm mb-1">Nombre(s) *</label>
+            <input type="text" id="nombreEmpleado" formControlName="nombreEmpleado" class="w-full p-2 border rounded">
+          </div>
+          
+          <div>
+            <label for="apellidoP" class="block text-sm mb-1">Apellido Paterno *</label>
+            <input type="text" id="apellidoP" formControlName="apellidoP" class="w-full p-2 border rounded">
+          </div>
+          
+          <div>
+            <label for="apellidoM" class="block text-sm mb-1">Apellido Materno</label>
+            <input type="text" id="apellidoM" formControlName="apellidoM" class="w-full p-2 border rounded">
+          </div>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+          <div>
+            <label for="fechaNacimiento" class="block text-sm mb-1">Fecha de Nacimiento *</label>
+            <input type="date" id="fechaNacimiento" formControlName="fechaNacimiento" class="w-full p-2 border rounded">
+          </div>
+          
+          <div>
+            <label for="sexo" class="block text-sm mb-1">Sexo *</label>
+            <select id="sexo" formControlName="sexo" class="w-full p-2 border rounded">
+              <option value="" disabled selected>Seleccione</option>
+              <option value="M">Masculino</option>
+              <option value="F">Femenino</option>
+            </select>
+          </div>
+          
+          <div>
+            <label for="rfc" class="block text-sm mb-1">RFC</label>
+            <input type="text" id="rfc" formControlName="rfc" class="w-full p-2 border rounded">
+          </div>
+        </div>
+        
+        <div>
+          <label for="fotoEmpleado" class="block text-sm mb-1">Fotografía</label>
+          <input type="file" id="fotoEmpleado" accept="image/*" (change)="onFileChange($event)" class="w-full p-2 border rounded">
+          <img *ngIf="previewImage" [src]="previewImage" alt="Vista previa" class="h-20 w-20 object-cover border mt-2">
+        </div>
+      </div>
+      
+      <!-- Información de Acceso -->
+      <div class="bg-white p-4 rounded shadow mb-4">
+        <h3 class="text-lg font-semibold mb-3">Información de Acceso</h3>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label for="contraseña" class="block text-sm mb-1">Contraseña *</label>
+            <input type="password" id="contraseña" formControlName="contraseña" class="w-full p-2 border rounded">
+          </div>
+          
+          <div>
+            <label for="confirmarContraseña" class="block text-sm mb-1">Confirmar Contraseña *</label>
+            <input type="password" id="confirmarContraseña" formControlName="confirmarContraseña" class="w-full p-2 border rounded">
+          </div>
+        </div>
+      </div>
+      
+      <!-- Información Laboral -->
+      <div class="bg-white p-4 rounded shadow mb-4">
+        <h3 class="text-lg font-semibold mb-3">Información Laboral</h3>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label for="departamento" class="block text-sm mb-1">Departamento *</label>
+            <select id="departamento" formControlName="departamento" class="w-full p-2 border rounded">
+              <option value="" disabled selected>Seleccione</option>
+              <option value="Administración">Administración</option>
+              <option value="Contabilidad">Contabilidad</option>
+              <option value="Recursos Humanos">Recursos Humanos</option>
+              <option value="Ventas">Ventas</option>
+              <option value="Producción">Producción</option>
+              <option value="TI">TI</option>
+            </select>
+          </div>
+          
+          <div>
+            <label for="puesto" class="block text-sm mb-1">Puesto *</label>
+            <input type="text" id="puesto" formControlName="puesto" class="w-full p-2 border rounded">
+          </div>
+          
+          <div>
+            <label for="rol" class="block text-sm mb-1">Rol *</label>
+            <select id="rol" formControlName="rol" class="w-full p-2 border rounded">
+              <option value="" disabled selected>Seleccione</option>
+              <option value="admin">Administrador</option>
+              <option value="usuario">Usuario</option>
+              <option value="supervisor">Supervisor</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Domicilio -->
+      <div class="bg-white p-4 rounded shadow mb-4">
+        <h3 class="text-lg font-semibold mb-3">Domicilio</h3>
+        
+        <div formGroupName="domicilio">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div>
+              <label for="calle" class="block text-sm mb-1">Calle *</label>
+              <input type="text" id="calle" formControlName="calle" class="w-full p-2 border rounded">
+            </div>
+            
+            <div>
+              <label for="colonia" class="block text-sm mb-1">Colonia *</label>
+              <input type="text" id="colonia" formControlName="colonia" class="w-full p-2 border rounded">
+            </div>
+          </div>
+          
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label for="numInterior" class="block text-sm mb-1">Número Interior</label>
+              <input type="text" id="numInterior" formControlName="numInterior" class="w-full p-2 border rounded">
+            </div>
+            
+            <div>
+              <label for="numExterior" class="block text-sm mb-1">Número Exterior</label>
+              <input type="text" id="numExterior" formControlName="numExterior" class="w-full p-2 border rounded">
+            </div>
+            
+            <div>
+              <label for="codigoPostal" class="block text-sm mb-1">Código Postal *</label>
+              <input type="text" id="codigoPostal" formControlName="codigoPostal" class="w-full p-2 border rounded">
+            </div>
+            
+            <div>
+              <label for="ciudad" class="block text-sm mb-1">Ciudad *</label>
+              <input type="text" id="ciudad" formControlName="ciudad" class="w-full p-2 border rounded">
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Botones de acción -->
+      <div class="flex justify-end space-x-4">
+        <button type="button" class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400">
+          Cancelar
+        </button>
+        <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+          {{ submitted ? 'Registrando...' : 'Registrar Empleado' }}
+        </button>
+      </div>
+    </form>
+  </div>

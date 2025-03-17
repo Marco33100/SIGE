@@ -85,4 +85,4 @@ export class CatalogosService {
   getRolPorId(id: number): any {
     return this.cacheRoles.find(rol => rol.rol === id);
   }
-}
+} 
