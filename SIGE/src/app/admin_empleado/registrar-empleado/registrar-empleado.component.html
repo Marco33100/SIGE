@@ -1,165 +1,506 @@
-<div class="p-4 bg-gray-50">
-    <h2 class="text-xl font-bold mb-4">Registrar Nuevo Empleado</h2>
-    
-    <div *ngIf="successMessage" class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4">
-      {{ successMessage }}
+<div class="min-h-screen bg-gray-100 py-8 px-4">
+  <div class="max-w-5xl mx-auto bg-white rounded-lg shadow-md overflow-hidden">
+    <!-- Encabezado -->
+    <div class="bg-blue-700 py-6 px-8">
+      <h1 class="text-2xl font-bold text-white">Registro de Nuevo Empleado</h1>
     </div>
-    
-    <div *ngIf="errorMessage" class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4">
-      {{ errorMessage }}
-    </div>
-    
-    <form [formGroup]="empleadoForm" (ngSubmit)="onSubmit()">
-      <!-- Datos Personales -->
-      <div class="bg-white p-4 rounded shadow mb-4">
-        <h3 class="text-lg font-semibold mb-3">Datos Personales</h3>
+
+    <!-- Formulario -->
+    <form [formGroup]="empleadoForm" (ngSubmit)="onSubmit()" class="p-8" *ngIf="!loading">
+      <!-- Mensaje de carga -->
+      <div *ngIf="loading" class="flex justify-center items-center py-12">
+        <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-700"></div>
+        <span class="ml-3 text-gray-700">Cargando información...</span>
+      </div>
+
+      <!-- Información Personal -->
+      <div class="mb-8">
+        <h2 class="text-xl font-semibold text-gray-800 border-b border-gray-200 pb-2 mb-6">Información Personal</h2>
         
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-          <div>
-            <label for="nombreEmpleado" class="block text-sm mb-1">Nombre(s) *</label>
-            <input type="text" id="nombreEmpleado" formControlName="nombreEmpleado" class="w-full p-2 border rounded">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <!-- Nombre -->
+          <div class="col-span-1">
+            <label for="nombreEmpleado" class="block text-sm font-medium text-gray-700 mb-1">Nombre(s) *</label>
+            <input 
+              type="text" 
+              id="nombreEmpleado" 
+              formControlName="nombreEmpleado" 
+              class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              [ngClass]="{'border-red-500': empleadoForm.get('nombreEmpleado')?.invalid && empleadoForm.get('nombreEmpleado')?.touched}">
+            <div *ngIf="empleadoForm.get('nombreEmpleado')?.invalid && empleadoForm.get('nombreEmpleado')?.touched" class="text-sm text-red-600 mt-1">
+              Campo requerido (máximo 50 caracteres)
+            </div>
           </div>
-          
-          <div>
-            <label for="apellidoP" class="block text-sm mb-1">Apellido Paterno *</label>
-            <input type="text" id="apellidoP" formControlName="apellidoP" class="w-full p-2 border rounded">
+
+          <!-- Apellido Paterno -->
+          <div class="col-span-1">
+            <label for="apellidoP" class="block text-sm font-medium text-gray-700 mb-1">Apellido Paterno *</label>
+            <input 
+              type="text" 
+              id="apellidoP" 
+              formControlName="apellidoP" 
+              class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              [ngClass]="{'border-red-500': empleadoForm.get('apellidoP')?.invalid && empleadoForm.get('apellidoP')?.touched}">
+            <div *ngIf="empleadoForm.get('apellidoP')?.invalid && empleadoForm.get('apellidoP')?.touched" class="text-sm text-red-600 mt-1">
+              Campo requerido (máximo 30 caracteres)
+            </div>
           </div>
-          
-          <div>
-            <label for="apellidoM" class="block text-sm mb-1">Apellido Materno</label>
-            <input type="text" id="apellidoM" formControlName="apellidoM" class="w-full p-2 border rounded">
+
+          <!-- Apellido Materno -->
+          <div class="col-span-1">
+            <label for="apellidoM" class="block text-sm font-medium text-gray-700 mb-1">Apellido Materno</label>
+            <input 
+              type="text" 
+              id="apellidoM" 
+              formControlName="apellidoM" 
+              class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              [ngClass]="{'border-red-500': empleadoForm.get('apellidoM')?.invalid && empleadoForm.get('apellidoM')?.touched}">
+            <div *ngIf="empleadoForm.get('apellidoM')?.invalid && empleadoForm.get('apellidoM')?.touched" class="text-sm text-red-600 mt-1">
+              Máximo 30 caracteres
+            </div>
           </div>
-        </div>
-        
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-          <div>
-            <label for="fechaNacimiento" class="block text-sm mb-1">Fecha de Nacimiento *</label>
-            <input type="date" id="fechaNacimiento" formControlName="fechaNacimiento" class="w-full p-2 border rounded">
+
+          <!-- Fecha de Nacimiento -->
+          <div class="col-span-1">
+            <label for="fechaNacimiento" class="block text-sm font-medium text-gray-700 mb-1">Fecha de Nacimiento *</label>
+            <input 
+              type="date" 
+              id="fechaNacimiento" 
+              formControlName="fechaNacimiento" 
+              class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              [ngClass]="{'border-red-500': empleadoForm.get('fechaNacimiento')?.invalid && empleadoForm.get('fechaNacimiento')?.touched}">
+            <div *ngIf="empleadoForm.get('fechaNacimiento')?.invalid && empleadoForm.get('fechaNacimiento')?.touched" class="text-sm text-red-600 mt-1">
+              Campo requerido
+            </div>
           </div>
-          
-          <div>
-            <label for="sexo" class="block text-sm mb-1">Sexo *</label>
-            <select id="sexo" formControlName="sexo" class="w-full p-2 border rounded">
-              <option value="" disabled selected>Seleccione</option>
-              <option value="M">Masculino</option>
-              <option value="F">Femenino</option>
+
+          <!-- Sexo -->
+          <div class="col-span-1">
+            <label for="sexo" class="block text-sm font-medium text-gray-700 mb-1">Sexo *</label>
+            <select 
+              id="sexo" 
+              formControlName="sexo" 
+              class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              [ngClass]="{'border-red-500': empleadoForm.get('sexo')?.invalid && empleadoForm.get('sexo')?.touched}">
+              <option value="">Seleccionar</option>
+              <option *ngFor="let opcion of catalogos.sexo" [value]="opcion.id">{{ opcion.descripcion }}</option>
             </select>
+            <div *ngIf="empleadoForm.get('sexo')?.invalid && empleadoForm.get('sexo')?.touched" class="text-sm text-red-600 mt-1">
+              Campo requerido
+            </div>
           </div>
-          
-          <div>
-            <label for="rfc" class="block text-sm mb-1">RFC</label>
-            <input type="text" id="rfc" formControlName="rfc" class="w-full p-2 border rounded">
-          </div>
-        </div>
-        
-        <div>
-          <label for="fotoEmpleado" class="block text-sm mb-1">Fotografía</label>
-          <input type="file" id="fotoEmpleado" accept="image/*" (change)="onFileChange($event)" class="w-full p-2 border rounded">
-          <img *ngIf="previewImage" [src]="previewImage" alt="Vista previa" class="h-20 w-20 object-cover border mt-2">
-        </div>
-      </div>
-      
-      <!-- Información de Acceso -->
-      <div class="bg-white p-4 rounded shadow mb-4">
-        <h3 class="text-lg font-semibold mb-3">Información de Acceso</h3>
-        
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label for="contraseña" class="block text-sm mb-1">Contraseña *</label>
-            <input type="password" id="contraseña" formControlName="contraseña" class="w-full p-2 border rounded">
-          </div>
-          
-          <div>
-            <label for="confirmarContraseña" class="block text-sm mb-1">Confirmar Contraseña *</label>
-            <input type="password" id="confirmarContraseña" formControlName="confirmarContraseña" class="w-full p-2 border rounded">
+
+          <!-- Foto del Empleado -->
+          <div class="col-span-1">
+            <label for="fotoEmpleado" class="block text-sm font-medium text-gray-700 mb-1">Fotografía</label>
+            <div class="flex items-center">
+              <div *ngIf="previewImage" class="mr-4">
+                <img [src]="previewImage" alt="Vista previa" class="h-16 w-16 object-cover rounded-md">
+              </div>
+              <label class="flex items-center px-4 py-2 bg-gray-200 text-gray-700 rounded-md cursor-pointer hover:bg-gray-300">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                Subir foto
+                <input 
+                  type="file" 
+                  id="fotoEmpleado" 
+                  (change)="onFileChange($event)" 
+                  accept="image/*" 
+                  class="hidden">
+              </label>
+            </div>
           </div>
         </div>
       </div>
-      
+
       <!-- Información Laboral -->
-      <div class="bg-white p-4 rounded shadow mb-4">
-        <h3 class="text-lg font-semibold mb-3">Información Laboral</h3>
+      <div class="mb-8">
+        <h2 class="text-xl font-semibold text-gray-800 border-b border-gray-200 pb-2 mb-6">Información Laboral</h2>
         
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <!-- Departamento -->
           <div>
-            <label for="departamento" class="block text-sm mb-1">Departamento *</label>
-            <select id="departamento" formControlName="departamento" class="w-full p-2 border rounded">
-              <option value="" disabled selected>Seleccione</option>
-              <option value="Administración">Administración</option>
-              <option value="Contabilidad">Contabilidad</option>
-              <option value="Recursos Humanos">Recursos Humanos</option>
-              <option value="Ventas">Ventas</option>
-              <option value="Producción">Producción</option>
-              <option value="TI">TI</option>
+            <label for="departamento" class="block text-sm font-medium text-gray-700 mb-1">Departamento *</label>
+            <select 
+              id="departamento" 
+              formControlName="departamento" 
+              class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              [ngClass]="{'border-red-500': empleadoForm.get('departamento')?.invalid && empleadoForm.get('departamento')?.touched}">
+              <option value="">Seleccionar</option>
+              <option *ngFor="let dep of catalogos.departamentos" [value]="dep.id">{{ dep.nombre }}</option>
             </select>
+            <div *ngIf="empleadoForm.get('departamento')?.invalid && empleadoForm.get('departamento')?.touched" class="text-sm text-red-600 mt-1">
+              Campo requerido
+            </div>
           </div>
-          
+
+          <!-- Puesto -->
           <div>
-            <label for="puesto" class="block text-sm mb-1">Puesto *</label>
-            <input type="text" id="puesto" formControlName="puesto" class="w-full p-2 border rounded">
-          </div>
-          
-          <div>
-            <label for="rol" class="block text-sm mb-1">Rol *</label>
-            <select id="rol" formControlName="rol" class="w-full p-2 border rounded">
-              <option value="" disabled selected>Seleccione</option>
-              <option value="admin">Administrador</option>
-              <option value="usuario">Usuario</option>
-              <option value="supervisor">Supervisor</option>
+            <label for="puesto" class="block text-sm font-medium text-gray-700 mb-1">Puesto *</label>
+            <select 
+              id="puesto" 
+              formControlName="puesto" 
+              class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              [ngClass]="{'border-red-500': empleadoForm.get('puesto')?.invalid && empleadoForm.get('puesto')?.touched}">
+              <option value="">Seleccionar</option>
+              <option *ngFor="let puesto of catalogos.puestos" [value]="puesto.id">{{ puesto.nombre }}</option>
             </select>
+            <div *ngIf="empleadoForm.get('puesto')?.invalid && empleadoForm.get('puesto')?.touched" class="text-sm text-red-600 mt-1">
+              Campo requerido
+            </div>
+          </div>
+
+          <!-- Rol -->
+          <div>
+            <label for="rol" class="block text-sm font-medium text-gray-700 mb-1">Rol *</label>
+            <select 
+              id="rol" 
+              formControlName="rol" 
+              class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              [ngClass]="{'border-red-500': empleadoForm.get('rol')?.invalid && empleadoForm.get('rol')?.touched}">
+              <option value="">Seleccionar</option>
+              <option *ngFor="let rol of catalogos.roles" [value]="rol.id">{{ rol.nombre }}</option>
+            </select>
+            <div *ngIf="empleadoForm.get('rol')?.invalid && empleadoForm.get('rol')?.touched" class="text-sm text-red-600 mt-1">
+              Campo requerido
+            </div>
           </div>
         </div>
       </div>
-      
+
+      <!-- Información de Seguridad -->
+      <div class="mb-8">
+        <h2 class="text-xl font-semibold text-gray-800 border-b border-gray-200 pb-2 mb-6">Información de Seguridad</h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Contraseña -->
+          <div>
+            <label for="contraseña" class="block text-sm font-medium text-gray-700 mb-1">Contraseña *</label>
+            <input 
+              type="password" 
+              id="contraseña" 
+              formControlName="contraseña" 
+              class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              [ngClass]="{'border-red-500': empleadoForm.get('contraseña')?.invalid && empleadoForm.get('contraseña')?.touched}">
+            <div *ngIf="empleadoForm.get('contraseña')?.invalid && empleadoForm.get('contraseña')?.touched" class="text-sm text-red-600 mt-1">
+              Se requiere una contraseña de al menos 8 caracteres
+            </div>
+          </div>
+
+          <!-- Confirmar Contraseña -->
+          <div>
+            <label for="confirmarContraseña" class="block text-sm font-medium text-gray-700 mb-1">Confirmar Contraseña *</label>
+            <input 
+              type="password" 
+              id="confirmarContraseña" 
+              formControlName="confirmarContraseña" 
+              class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              [ngClass]="{'border-red-500': empleadoForm.get('confirmarContraseña')?.invalid && empleadoForm.get('confirmarContraseña')?.touched}">
+            <div *ngIf="empleadoForm.get('confirmarContraseña')?.invalid && empleadoForm.get('confirmarContraseña')?.touched" class="text-sm text-red-600 mt-1">
+              Campo requerido
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Datos de Contacto -->
+      <div class="mb-8">
+        <h2 class="text-xl font-semibold text-gray-800 border-b border-gray-200 pb-2 mb-6">Datos de Contacto</h2>
+        
+        <!-- Teléfonos -->
+        <div class="mb-6">
+          <div class="flex items-center justify-between mb-2">
+            <label class="text-sm font-medium text-gray-700">Teléfonos *</label>
+            <button type="button" (click)="agregarTelefono()" class="text-sm px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+              Agregar teléfono
+            </button>
+          </div>
+
+          <div formArrayName="telefono" class="space-y-3">
+            <div *ngFor="let tel of telefonos.controls; let i = index" [formGroupName]="i" class="flex items-center space-x-2">
+              <input 
+                type="text"
+                formControlName="numero" 
+                placeholder="Número de teléfono (10 dígitos)" 
+                class="flex-1 rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                [ngClass]="{'border-red-500': tel.get('numero')?.invalid && tel.get('numero')?.touched}">
+              
+              <button 
+                type="button" 
+                *ngIf="telefonos.controls.length > 1" 
+                (click)="eliminarTelefono(i)" 
+                class="p-2 text-red-600 rounded-md hover:bg-red-100">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div *ngIf="telefonos.controls[0]?.get('numero')?.invalid && telefonos.controls[0]?.get('numero')?.touched" class="text-sm text-red-600 mt-1">
+            Ingrese un número de teléfono válido (10 dígitos)
+          </div>
+        </div>
+
+        <!-- Correos Electrónicos -->
+        <div class="mb-6">
+          <div class="flex items-center justify-between mb-2">
+            <label class="text-sm font-medium text-gray-700">Correos Electrónicos *</label>
+            <button type="button" (click)="agregarCorreo()" class="text-sm px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+              Agregar correo
+            </button>
+          </div>
+
+          <div formArrayName="correoElectronico" class="space-y-3">
+            <div *ngFor="let correo of correos.controls; let i = index" [formGroupName]="i" class="flex items-center space-x-2">
+              <input 
+                type="email" 
+                formControlName="email" 
+                placeholder="Correo electrónico" 
+                class="flex-1 rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                [ngClass]="{'border-red-500': correo.get('email')?.invalid && correo.get('email')?.touched}">
+              
+              <button 
+                type="button" 
+                *ngIf="correos.controls.length > 1" 
+                (click)="eliminarCorreo(i)" 
+                class="p-2 text-red-600 rounded-md hover:bg-red-100">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div *ngIf="correos.controls[0]?.get('email')?.invalid && correos.controls[0]?.get('email')?.touched" class="text-sm text-red-600 mt-1">
+            Ingrese un correo electrónico válido
+          </div>
+        </div>
+      </div>
+
       <!-- Domicilio -->
-      <div class="bg-white p-4 rounded shadow mb-4">
-        <h3 class="text-lg font-semibold mb-3">Domicilio</h3>
+      <div class="mb-8" formGroupName="domicilio">
+        <h2 class="text-xl font-semibold text-gray-800 border-b border-gray-200 pb-2 mb-6">Domicilio</h2>
         
-        <div formGroupName="domicilio">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-            <div>
-              <label for="calle" class="block text-sm mb-1">Calle *</label>
-              <input type="text" id="calle" formControlName="calle" class="w-full p-2 border rounded">
-            </div>
-            
-            <div>
-              <label for="colonia" class="block text-sm mb-1">Colonia *</label>
-              <input type="text" id="colonia" formControlName="colonia" class="w-full p-2 border rounded">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <!-- Calle -->
+          <div class="col-span-1 md:col-span-2">
+            <label for="calle" class="block text-sm font-medium text-gray-700 mb-1">Calle *</label>
+            <input 
+              type="text" 
+              id="calle" 
+              formControlName="calle" 
+              class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              [ngClass]="{'border-red-500': empleadoForm.get('domicilio.calle')?.invalid && empleadoForm.get('domicilio.calle')?.touched}">
+            <div *ngIf="empleadoForm.get('domicilio.calle')?.invalid && empleadoForm.get('domicilio.calle')?.touched" class="text-sm text-red-600 mt-1">
+              Campo requerido (máximo 50 caracteres)
             </div>
           </div>
-          
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label for="numInterior" class="block text-sm mb-1">Número Interior</label>
-              <input type="text" id="numInterior" formControlName="numInterior" class="w-full p-2 border rounded">
+
+          <!-- Número Exterior -->
+          <div>
+            <label for="numExterior" class="block text-sm font-medium text-gray-700 mb-1">Número Exterior</label>
+            <input 
+              type="text" 
+              id="numExterior" 
+              formControlName="numExterior" 
+              class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+          </div>
+
+          <!-- Número Interior -->
+          <div>
+            <label for="numInterior" class="block text-sm font-medium text-gray-700 mb-1">Número Interior</label>
+            <input 
+              type="text" 
+              id="numInterior" 
+              formControlName="numInterior" 
+              class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+          </div>
+
+          <!-- Colonia -->
+          <div>
+            <label for="colonia" class="block text-sm font-medium text-gray-700 mb-1">Colonia *</label>
+            <input 
+              type="text" 
+              id="colonia" 
+              formControlName="colonia" 
+              class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              [ngClass]="{'border-red-500': empleadoForm.get('domicilio.colonia')?.invalid && empleadoForm.get('domicilio.colonia')?.touched}">
+            <div *ngIf="empleadoForm.get('domicilio.colonia')?.invalid && empleadoForm.get('domicilio.colonia')?.touched" class="text-sm text-red-600 mt-1">
+              Campo requerido (máximo 30 caracteres)
             </div>
-            
-            <div>
-              <label for="numExterior" class="block text-sm mb-1">Número Exterior</label>
-              <input type="text" id="numExterior" formControlName="numExterior" class="w-full p-2 border rounded">
+          </div>
+
+          <!-- Código Postal -->
+          <div>
+            <label for="codigoPostal" class="block text-sm font-medium text-gray-700 mb-1">Código Postal *</label>
+            <input 
+              type="text" 
+              id="codigoPostal" 
+              formControlName="codigoPostal" 
+              class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              [ngClass]="{'border-red-500': empleadoForm.get('domicilio.codigoPostal')?.invalid && empleadoForm.get('domicilio.codigoPostal')?.touched}">
+            <div *ngIf="empleadoForm.get('domicilio.codigoPostal')?.invalid && empleadoForm.get('domicilio.codigoPostal')?.touched" class="text-sm text-red-600 mt-1">
+              Ingrese un código postal válido (5 dígitos)
             </div>
-            
-            <div>
-              <label for="codigoPostal" class="block text-sm mb-1">Código Postal *</label>
-              <input type="text" id="codigoPostal" formControlName="codigoPostal" class="w-full p-2 border rounded">
-            </div>
-            
-            <div>
-              <label for="ciudad" class="block text-sm mb-1">Ciudad *</label>
-              <input type="text" id="ciudad" formControlName="ciudad" class="w-full p-2 border rounded">
+          </div>
+
+          <!-- Ciudad -->
+          <div>
+            <label for="ciudad" class="block text-sm font-medium text-gray-700 mb-1">Ciudad *</label>
+            <select 
+              id="ciudad" 
+              formControlName="ciudad" 
+              class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              [ngClass]="{'border-red-500': empleadoForm.get('domicilio.ciudad')?.invalid && empleadoForm.get('domicilio.ciudad')?.touched}">
+              <option value="">Seleccionar</option>
+              <option *ngFor="let ciudad of catalogos.ciudades" [value]="ciudad.id">{{ ciudad.nombre }}</option>
+            </select>
+            <div *ngIf="empleadoForm.get('domicilio.ciudad')?.invalid && empleadoForm.get('domicilio.ciudad')?.touched" class="text-sm text-red-600 mt-1">
+              Campo requerido
             </div>
           </div>
         </div>
       </div>
-      
-      <!-- Botones de acción -->
-      <div class="flex justify-end space-x-4">
-        <button type="button" class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400">
+
+      <!-- Referencias Familiares -->
+      <div class="mb-8">
+        <div class="flex items-center justify-between mb-2">
+          <h2 class="text-xl font-semibold text-gray-800">Referencias Familiares</h2>
+          <button 
+            type="button" 
+            (click)="agregarReferencia()" 
+            class="text-sm px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            Agregar referencia
+          </button>
+        </div>
+
+        <div formArrayName="referenciasFamiliares" class="space-y-6">
+          <div *ngFor="let referencia of referencias.controls; let i = index" [formGroupName]="i" class="p-4 border border-gray-200 rounded-lg bg-gray-50">
+            <div class="flex justify-between mb-4">
+              <h3 class="font-medium text-gray-700">Referencia #{{ i + 1 }}</h3>
+              <button 
+                type="button" 
+                (click)="eliminarReferencia(i)" 
+                class="text-sm px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500">
+                Eliminar
+              </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+              <!-- Nombre Completo -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Nombre Completo *</label>
+                <input 
+                  type="text" 
+                  formControlName="nomCompleto" 
+                  class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  [ngClass]="{'border-red-500': referencia.get('nomCompleto')?.invalid && referencia.get('nomCompleto')?.touched}">
+                <div *ngIf="referencia.get('nomCompleto')?.invalid && referencia.get('nomCompleto')?.touched" class="text-sm text-red-600 mt-1">
+                  Campo requerido (máximo 70 caracteres)
+                </div>
+              </div>
+
+              <!-- Parentesco -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Parentesco *</label>
+                <select 
+                  formControlName="parentesco" 
+                  class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  [ngClass]="{'border-red-500': referencia.get('parentesco')?.invalid && referencia.get('parentesco')?.touched}">
+                  <option value="">Seleccionar</option>
+                  <option *ngFor="let parentesco of catalogos.parentescos" [value]="parentesco.id">{{ parentesco.descripcion }}</option>
+                </select>
+                <div *ngIf="referencia.get('parentesco')?.invalid && referencia.get('parentesco')?.touched" class="text-sm text-red-600 mt-1">
+                  Campo requerido
+                </div>
+              </div>
+            </div>
+
+            <!-- Teléfonos de Contacto -->
+            <div class="mb-4">
+              <div class="flex items-center justify-between mb-2">
+                <label class="text-sm font-medium text-gray-700">Teléfonos de Contacto *</label>
+                <button 
+                  type="button" 
+                  (click)="agregarTelefonoReferencia(i)" 
+                  class="text-xs px-2 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  Agregar teléfono
+                </button>
+              </div>
+
+              <div formArrayName="telefono" class="space-y-2">
+                <div *ngFor="let tel of telefonosReferencia(i).controls; let j = index" [formGroupName]="j" class="flex items-center space-x-2">
+                  <input 
+                    type="text" 
+                    formControlName="numero" 
+                    placeholder="Número de teléfono (10 dígitos)"
+                    class="flex-1 rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    [ngClass]="{'border-red-500': tel.get('numero')?.invalid && tel.get('numero')?.touched}">
+                  
+                  <button 
+                    type="button" 
+                    *ngIf="telefonosReferencia(i).controls.length > 1" 
+                    (click)="eliminarTelefonoReferencia(i, j)" 
+                    class="p-1 text-red-600 rounded-md hover:bg-red-100">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Correos Electrónicos de Contacto -->
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <label class="text-sm font-medium text-gray-700">Correos Electrónicos</label>
+                <button 
+                  type="button" 
+                  (click)="agregarCorreoReferencia(i)" 
+                  class="text-xs px-2 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  Agregar correo
+                </button>
+              </div>
+
+              <div formArrayName="correo" class="space-y-2">
+                <div *ngFor="let correo of correosReferencia(i).controls; let j = index" [formGroupName]="j" class="flex items-center space-x-2">
+                  <input 
+                    type="email" 
+                    formControlName="email" 
+                    placeholder="Correo electrónico"
+                    class="flex-1 rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    [ngClass]="{'border-red-500': correo.get('email')?.invalid && correo.get('email')?.touched}">
+                  
+                  <button 
+                    type="button" 
+                    *ngIf="correosReferencia(i).controls.length > 1" 
+                    (click)="eliminarCorreoReferencia(i, j)" 
+                    class="p-1 text-red-600 rounded-md hover:bg-red-100">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Botones de Acción -->
+      <div class="flex justify-end space-x-4 mt-10">
+        <button 
+          type="button" 
+          routerLink="/empleados" 
+          class="px-6 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500">
           Cancelar
         </button>
-        <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
-          {{ submitted ? 'Registrando...' : 'Registrar Empleado' }}
+        <button 
+          type="submit" 
+          class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+          Registrar Empleado
         </button>
       </div>
     </form>
   </div>
+</div>
