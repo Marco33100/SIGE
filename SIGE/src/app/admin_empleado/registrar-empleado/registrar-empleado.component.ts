@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormGroup, FormBuilder, FormArray, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { forkJoin } from 'rxjs';
 import { EmpleadoService } from '../../../services/empleados.service';
 import { CatalogosService } from '../../../services/catalogos.service';
 
@@ -19,9 +18,27 @@ import { CatalogosService } from '../../../services/catalogos.service';
 
 export class RegistrarEmpleadoComponent implements OnInit {
   empleadoForm!: FormGroup;
-  catalogos: any = {};
+  catalogos: any = {
+    ciudades: [],
+    sexos: [],
+    puestos: [],
+    departamentos: [],
+    roles: [],
+    parentescos: []
+  };
   loading = true;
   previewImage: string | ArrayBuffer | null = null;
+  mensaje: string = '';
+
+  // Control de carga de catálogos
+  catalogosLoaded = {
+    ciudades: false,
+    sexos: false,
+    puestos: false,
+    departamentos: false,
+    roles: false,
+    parentescos: false
+  };
 
   constructor(
     private fb: FormBuilder,
@@ -63,24 +80,109 @@ export class RegistrarEmpleadoComponent implements OnInit {
     });
   }
 
-  private cargarCatalogos(): void {
-    forkJoin({
-      sexo: this.catalogosService.getSexos(),
-      parentescos: this.catalogosService.getParentescos(),
-      ciudades: this.catalogosService.getCiudades(),
-      departamentos: this.catalogosService.getDepartamentos(),
-      puestos: this.catalogosService.getPuestos(),
-      roles: this.catalogosService.getRoles()
-    }).subscribe({
-      next: (data) => {
-        this.catalogos = data;
-        this.loading = false;
+  private allCatalogosLoaded(): boolean {
+    return Object.values(this.catalogosLoaded).every(loaded => loaded);
+  }
+
+  cargarCatalogos(): void {
+    console.log('Cargando catálogos...');
+    
+    this.catalogosService.getCiudades().subscribe({
+      next: ciudades => {
+        this.catalogos.ciudades = ciudades;
+        this.catalogosLoaded.ciudades = true;
+        console.log('Ciudades cargadas:', ciudades);
+        this.checkLoading();
       },
-      error: (error) => {
-        console.error('Error cargando catálogos:', error);
-        this.loading = false;
+      error: err => {
+        console.error('Error al cargar ciudades:', err);
+        this.catalogosLoaded.ciudades = true;
+        this.mensaje = 'Error al cargar catálogo de ciudades';
+        this.checkLoading();
       }
     });
+    
+    this.catalogosService.getPuestos().subscribe({
+      next: puestos => {
+        this.catalogos.puestos = puestos;
+        this.catalogosLoaded.puestos = true;
+        console.log('Puestos cargados:', puestos);
+        this.checkLoading();
+      },
+      error: err => {
+        console.error('Error al cargar puestos:', err);
+        this.catalogosLoaded.puestos = true;
+        this.mensaje = 'Error al cargar catálogo de puestos';
+        this.checkLoading();
+      }
+    });
+    
+    this.catalogosService.getDepartamentos().subscribe({
+      next: departamentos => {
+        this.catalogos.departamentos = departamentos;
+        this.catalogosLoaded.departamentos = true;
+        console.log('Departamentos cargados:', departamentos);
+        this.checkLoading();
+      },
+      error: err => {
+        console.error('Error al cargar departamentos:', err);
+        this.catalogosLoaded.departamentos = true;
+        this.mensaje = 'Error al cargar catálogo de departamentos';
+        this.checkLoading();
+      }
+    });
+
+    this.catalogosService.getSexos().subscribe({
+      next: sexos => {
+        this.catalogos.sexos = sexos;
+        this.catalogosLoaded.sexos = true;
+        console.log('Sexos cargados:', sexos);
+        this.checkLoading();
+      },
+      error: err => {
+        console.error('Error al cargar sexos:', err);
+        this.catalogosLoaded.sexos = true;
+        this.mensaje = 'Error al cargar catálogo de sexos';
+        this.checkLoading();
+      }
+    });
+
+    this.catalogosService.getRoles().subscribe({
+      next: roles => {
+        this.catalogos.roles = roles;
+        this.catalogosLoaded.roles = true;
+        console.log('Roles cargados:', roles);
+        this.checkLoading();
+      },
+      error: err => {
+        console.error('Error al cargar roles:', err);
+        this.catalogosLoaded.roles = true;
+        this.mensaje = 'Error al cargar catálogo de roles';
+        this.checkLoading();
+      }
+    });
+    
+    this.catalogosService.getParentescos().subscribe({
+      next: parentescos => {
+        this.catalogos.parentescos = parentescos;
+        this.catalogosLoaded.parentescos = true;
+        console.log('Parentescos cargados:', parentescos);
+        this.checkLoading();
+      },
+      error: err => {
+        console.error('Error al cargar parentescos:', err);
+        this.catalogosLoaded.parentescos = true;
+        this.mensaje = 'Error al cargar catálogo de parentescos';
+        this.checkLoading();
+      }
+    });
+  }
+  
+  checkLoading(): void {
+    if (this.allCatalogosLoaded()) {
+      console.log('Todos los catálogos cargados correctamente');
+      this.loading = false;
+    }
   }
 
   // Métodos para teléfonos
@@ -99,7 +201,11 @@ export class RegistrarEmpleadoComponent implements OnInit {
   }
 
   eliminarTelefono(index: number): void {
-    this.telefonos.removeAt(index);
+    if (this.telefonos.length > 1) {
+      this.telefonos.removeAt(index);
+    } else {
+      alert('Debe mantener al menos un teléfono');
+    }
   }
 
   // Métodos para correos
@@ -118,7 +224,11 @@ export class RegistrarEmpleadoComponent implements OnInit {
   }
 
   eliminarCorreo(index: number): void {
-    this.correos.removeAt(index);
+    if (this.correos.length > 1) {
+      this.correos.removeAt(index);
+    } else {
+      alert('Debe mantener al menos un correo electrónico');
+    }
   }
 
   // Métodos para referencias familiares
@@ -152,7 +262,11 @@ export class RegistrarEmpleadoComponent implements OnInit {
   }
 
   eliminarTelefonoReferencia(refIndex: number, telIndex: number): void {
-    this.telefonosReferencia(refIndex).removeAt(telIndex);
+    if (this.telefonosReferencia(refIndex).length > 1) {
+      this.telefonosReferencia(refIndex).removeAt(telIndex);
+    } else {
+      alert('Debe mantener al menos un teléfono para la referencia');
+    }
   }
 
   correosReferencia(index: number): FormArray {
@@ -164,7 +278,11 @@ export class RegistrarEmpleadoComponent implements OnInit {
   }
 
   eliminarCorreoReferencia(refIndex: number, correoIndex: number): void {
-    this.correosReferencia(refIndex).removeAt(correoIndex);
+    if (this.correosReferencia(refIndex).length > 1) {
+      this.correosReferencia(refIndex).removeAt(correoIndex);
+    } else {
+      alert('Debe mantener al menos un correo para la referencia');
+    }
   }
 
   onFileChange(event: any): void {
@@ -179,6 +297,7 @@ export class RegistrarEmpleadoComponent implements OnInit {
     } else {
       this.previewImage = null;
       this.empleadoForm.patchValue({ fotoEmpleado: '' });
+      alert('Por favor seleccione un archivo de imagen válido');
     }
   }
 
@@ -245,4 +364,9 @@ export class RegistrarEmpleadoComponent implements OnInit {
       }
     });
   }
+
+  cancelar(): void {
+    this.router.navigate(['/empleados']);
+  }
+  
 }

@@ -1,7 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { from, Observable } from 'rxjs';
-import { ApiResponse, Empleado, FiltrosEmpleado } from '../app/interface/empleado.interface'
+import { Observable } from 'rxjs';
+import { tap } from 'rxjs/operators';
+import { ApiResponse, FiltrosEmpleado } from '../app/interface/empleado.interface';
+import { AuthService } from './auth.service';
 
 @Injectable({
   providedIn: 'root'
@@ -10,11 +12,15 @@ export class EmpleadoService {
   // URL base de la API - ajusta según tu configuración
   private apiUrl = 'http://localhost:3000/api/empleados';
 
-  constructor(private http: HttpClient) { }
+  constructor(
+    private http: HttpClient,
+    private authService: AuthService
+  ) { }
 
-  // CU01: Inicio de sesión
+  // CU01: Inicio de sesión - Ya no es necesario aquí ya que está en AuthService
+  // Se mantiene por compatibilidad pero debería redirigir al AuthService
   login(claveEmpleado: string, contraseña: string): Observable<any> {
-    return this.http.post(`${this.apiUrl}/login`, { claveEmpleado, contraseña });
+    return this.authService.login(claveEmpleado, contraseña);
   }
 
   // CU02: Registrar un nuevo empleado
@@ -53,8 +59,7 @@ export class EmpleadoService {
 
     return this.http.get<ApiResponse>(`${this.apiUrl}/listar`, { params });
   }
-
-
+  
   // CU10: Editar datos del empleado
   actualizarEmpleado(claveEmpleado: string, datosActualizados: any): Observable<any> {
     return this.http.put(`${this.apiUrl}/${claveEmpleado}`, datosActualizados);
@@ -62,7 +67,9 @@ export class EmpleadoService {
 
   // CU11: Consultar información personal del empleado
   obtenerInfoPersonal(claveEmpleado: string): Observable<any> {
-    return this.http.get(`${this.apiUrl}/personal/${claveEmpleado}`);
+    // Usar los headers de autenticación desde AuthService
+    const headers = this.authService.getAuthHeaders();
+    return this.http.get(`${this.apiUrl}/personal/${claveEmpleado}`, { headers });
   }
 
   // CU12: Eliminar empleados (eliminación lógica)
@@ -77,18 +84,24 @@ export class EmpleadoService {
 
   // Obtener datos del empleado logueado desde localStorage
   obtenerSesionEmpleado(): any {
+    // Intentar obtener primero desde empleadoActual (manera antigua)
     const empleadoGuardado = localStorage.getItem('empleadoActual');
-    return empleadoGuardado ? JSON.parse(empleadoGuardado) : null;
+    if (empleadoGuardado) {
+      return JSON.parse(empleadoGuardado);
+    }
+    
+    // Si no existe, intentar obtener desde AuthService
+    return this.authService.getEmpleadoData();
   }
 
   // Verificar si hay un empleado logueado
   estaLogueado(): boolean {
-    return localStorage.getItem('empleadoActual') !== null;
+    return this.obtenerSesionEmpleado() !== null;
   }
 
-  // Cerrar sesión
+  // Cerrar sesión - sincronizar con AuthService
   cerrarSesion(): void {
     localStorage.removeItem('empleadoActual');
+    this.authService.logout(); // También llamar al logout de AuthService
   }
-
 }

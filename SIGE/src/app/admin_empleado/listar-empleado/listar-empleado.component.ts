@@ -53,7 +53,7 @@ export class ListarEmpleadoComponent implements OnInit {
   mostrarDialogoReactivar: boolean = false;
   empleadoAccion: any = null;
   
-  // Track if catalogs are loaded
+  // Control de carga de catálogos
   catalogosLoaded = {
     ciudades: false,
     sexos: false,
@@ -76,7 +76,6 @@ export class ListarEmpleadoComponent implements OnInit {
   }
 
   cargarCatalogos(): void {
-    // Add loading indicators
     console.log('Cargando catálogos...');
     
     this.catalogoService.getCiudades().subscribe({
@@ -159,12 +158,12 @@ export class ListarEmpleadoComponent implements OnInit {
 
   cargarEmpleados(): void {
     this.cargando = true;
-    this.limpiarFiltrosVacios();
+    const filtrosLimpios = this.obtenerFiltrosLimpios();
     
     this.empleadoService.listarEmpleados(
       this.paginacion.paginaActual,
       this.paginacion.itemsPorPagina,
-      this.filtros
+      filtrosLimpios
     ).subscribe({
       next: (respuesta: ApiResponse) => {
         if (respuesta.exito) {
@@ -184,6 +183,29 @@ export class ListarEmpleadoComponent implements OnInit {
     });
   }
 
+  private obtenerFiltrosLimpios(): any {
+    // Crear una copia de los filtros
+    const filtrosLimpios = {...this.filtros};
+    
+    // Formatear fechas a formato ISO si existen
+    if (filtrosLimpios.fechaNacimiento && filtrosLimpios.fechaNacimiento !== '') {
+      filtrosLimpios.fechaNacimiento = new Date(filtrosLimpios.fechaNacimiento).toISOString().split('T')[0];
+    }
+    
+    if (filtrosLimpios.fechaAlta && filtrosLimpios.fechaAlta !== '') {
+      filtrosLimpios.fechaAlta = new Date(filtrosLimpios.fechaAlta).toISOString().split('T')[0];
+    }
+    
+    // Eliminar propiedades vacías
+    (Object.keys(filtrosLimpios) as Array<keyof FiltrosEmpleado>).forEach(key => {
+      if (filtrosLimpios[key] === '' || filtrosLimpios[key] === null || filtrosLimpios[key] === undefined) {
+        delete filtrosLimpios[key];
+      }
+    });
+    
+    return filtrosLimpios;
+  }
+
   private limpiarFiltrosVacios(): void {
     (Object.keys(this.filtros) as Array<keyof FiltrosEmpleado>).forEach(key => {
       if (this.filtros[key] === '' || this.filtros[key] === null || this.filtros[key] === undefined) {
@@ -191,6 +213,7 @@ export class ListarEmpleadoComponent implements OnInit {
       }
     });
   }
+  
   aplicarFiltros(): void {
     console.log('Aplicando filtros:', this.filtros);
     this.paginacion.paginaActual = 1;
@@ -286,5 +309,4 @@ export class ListarEmpleadoComponent implements OnInit {
   formatearFecha(fecha: string): string {
     return new Date(fecha).toLocaleDateString('es-MX');
   }
-  
 }

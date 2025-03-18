@@ -11,6 +11,7 @@ import { BuscarEmpleadoCursoComponent } from './admin-curso/buscar-empleado-curs
 import { VisualizarActividadesComponent } from './admin-curso/visualizar-actividades/visualizar-actividades.component';
 import { VisualizarCursosComponent } from './admin-curso/visualizar-cursos/visualizar-cursos.component';
 import { VisualizarDatosComponent } from './empleado/visualizar-datos/visualizar-datos.component';
+import { EditarDatosComponent } from './empleado/editar-datos/editar-datos.component';
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
   {
@@ -27,6 +28,7 @@ export const routes: Routes = [
       {path: 'visualizar-actividad', component: VisualizarActividadesComponent},
       {path: 'visualizar-curso', component: VisualizarCursosComponent},
       {path: 'visualizar-datos', component: VisualizarDatosComponent },
+      {path: 'editar-datos', component: EditarDatosComponent }
 
     ]
   },

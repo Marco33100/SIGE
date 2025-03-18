@@ -49,7 +49,9 @@ export class HomeComponent implements OnInit {
           { label: 'Inicio', icon: 'home', url: '/home' },
           { label: 'Buscar empleado', icon: 'search', url: '/home/buscar-empleado' },
           { label: 'Registrar empleado', icon: 'app_registration', url: '/home/registrar-empleado' },
-          { label: 'Listar empleado', icon: 'list', url: '/home/listar-empleado' }
+          { label: 'Listar empleado', icon: 'list', url: '/home/listar-empleado' },
+          { label: 'Mis datos personales', icon: 'app_registration', url: '/home/visualizar-datos' }
+
         ];
       case 2: // Administrador de cursos
         return [
@@ -58,14 +60,17 @@ export class HomeComponent implements OnInit {
           { label: 'Agregar cursos', icon: 'add_circle', url: '/home/agregar-curso' },
           { label: 'Empleados', icon: 'groups', url: '/home/buscar-empleadoCA' },
           {label: 'Visualizar Actividades', icon: 'visibility', url: '/home/visualizar-actividad'},
-          {label: 'Visualizar Cursos', icon:'visibility', url: '/home/visualizar-curso'}
+          {label: 'Visualizar Cursos', icon:'visibility', url: '/home/visualizar-curso'},
+          { label: 'Mis datos personales', icon: 'app_registration', url: '/home/visualizar-datos' }
+
         ];
       case 3: // Empleado
         return [
           { label: 'Inicio', icon: 'home', url: '/home' },
           { label: 'Mis cursos', icon: 'school', url: '/home/mis-cursos' },
-          { label: 'Mis datos personales', icon: 'app_registration', url: '/home/visualizar-datos' }
-
+          { label: 'Mis datos personales', icon: 'app_registration', url: '/home/visualizar-datos' },
+          { label: 'Editar', icon: 'app_registration', url: '/home/editar-datos' }
+          
         ];
       default:
         return [{ label: 'Inicio', icon: 'home', url: '/home' }];

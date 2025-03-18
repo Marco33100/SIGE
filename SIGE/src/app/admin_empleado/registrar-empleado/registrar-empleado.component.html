@@ -83,7 +83,7 @@
               class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               [ngClass]="{'border-red-500': empleadoForm.get('sexo')?.invalid && empleadoForm.get('sexo')?.touched}">
               <option value="">Seleccionar</option>
-              <option *ngFor="let opcion of catalogos.sexo" [value]="opcion.id">{{ opcion.descripcion }}</option>
+              <option *ngFor="let opcion of catalogos.sexos" [value]="opcion.sexo">{{ opcion.sexo }}</option>
             </select>
             <div *ngIf="empleadoForm.get('sexo')?.invalid && empleadoForm.get('sexo')?.touched" class="text-sm text-red-600 mt-1">
               Campo requerido
@@ -128,7 +128,7 @@
               class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               [ngClass]="{'border-red-500': empleadoForm.get('departamento')?.invalid && empleadoForm.get('departamento')?.touched}">
               <option value="">Seleccionar</option>
-              <option *ngFor="let dep of catalogos.departamentos" [value]="dep.id">{{ dep.nombre }}</option>
+              <option *ngFor="let dep of catalogos.departamentos" [value]="dep.nomDepartamento">{{ dep.nomDepartamento }}</option>
             </select>
             <div *ngIf="empleadoForm.get('departamento')?.invalid && empleadoForm.get('departamento')?.touched" class="text-sm text-red-600 mt-1">
               Campo requerido
@@ -144,7 +144,7 @@
               class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               [ngClass]="{'border-red-500': empleadoForm.get('puesto')?.invalid && empleadoForm.get('puesto')?.touched}">
               <option value="">Seleccionar</option>
-              <option *ngFor="let puesto of catalogos.puestos" [value]="puesto.id">{{ puesto.nombre }}</option>
+              <option *ngFor="let puesto of catalogos.puestos" [value]="puesto.nomPuesto">{{ puesto.nomPuesto }}</option>
             </select>
             <div *ngIf="empleadoForm.get('puesto')?.invalid && empleadoForm.get('puesto')?.touched" class="text-sm text-red-600 mt-1">
               Campo requerido
@@ -160,7 +160,7 @@
               class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               [ngClass]="{'border-red-500': empleadoForm.get('rol')?.invalid && empleadoForm.get('rol')?.touched}">
               <option value="">Seleccionar</option>
-              <option *ngFor="let rol of catalogos.roles" [value]="rol.id">{{ rol.nombre }}</option>
+              <option *ngFor="let rol of catalogos.roles" [value]="rol.rol">{{ rol.rol }}</option>
             </select>
             <div *ngIf="empleadoForm.get('rol')?.invalid && empleadoForm.get('rol')?.touched" class="text-sm text-red-600 mt-1">
               Campo requerido
@@ -353,7 +353,7 @@
               class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               [ngClass]="{'border-red-500': empleadoForm.get('domicilio.ciudad')?.invalid && empleadoForm.get('domicilio.ciudad')?.touched}">
               <option value="">Seleccionar</option>
-              <option *ngFor="let ciudad of catalogos.ciudades" [value]="ciudad.id">{{ ciudad.nombre }}</option>
+              <option *ngFor="let ciudad of catalogos.ciudades" [value]="ciudad.nomCiudad">{{ ciudad.nomCiudad }}</option>
             </select>
             <div *ngIf="empleadoForm.get('domicilio.ciudad')?.invalid && empleadoForm.get('domicilio.ciudad')?.touched" class="text-sm text-red-600 mt-1">
               Campo requerido
@@ -408,7 +408,7 @@
                   class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   [ngClass]="{'border-red-500': referencia.get('parentesco')?.invalid && referencia.get('parentesco')?.touched}">
                   <option value="">Seleccionar</option>
-                  <option *ngFor="let parentesco of catalogos.parentescos" [value]="parentesco.id">{{ parentesco.descripcion }}</option>
+                  <option *ngFor="let parentesco of catalogos.parentescos" [value]="parentesco.parentesco">{{ parentesco.parentesco }}</option>
                 </select>
                 <div *ngIf="referencia.get('parentesco')?.invalid && referencia.get('parentesco')?.touched" class="text-sm text-red-600 mt-1">
                   Campo requerido
@@ -501,6 +501,8 @@
           Registrar Empleado
         </button>
       </div>
+
+      
     </form>
   </div>
 </div>

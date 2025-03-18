@@ -1,9 +1,8 @@
-require('dotenv').config(); // Carga variables de entorno desde .env
+require('dotenv').config();
 
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-
 const catalogoRoutes = require('./routes/catalogoRoutes');
 const empleadosRoutes = require('./routes/empleadoRoutes');
 const actividadesRoutes = require('./routes/actividadRoutes');
@@ -13,20 +12,17 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/EmpleadosDB';
 
+// 🔥 Solución: Aumenta el límite del payload (10MB en este ejemplo)
+app.use(express.json({ limit: '10mb' })); // ✅ Límite para JSON
+app.use(express.urlencoded({ limit: '10mb', extended: true })); // ✅ Límite para URL-encoded
+
 // Middlewares
-app.use(cors()); // Permite solicitudes desde otros dominios
-app.use(express.json()); // Habilita JSON en las solicitudes
+app.use(cors());
 
 // Rutas
 app.use('/api/empleados', empleadosRoutes);
-
-//Actividades
 app.use('/api/actividades', actividadesRoutes);
-
-//Cursos
 app.use('/api/cursos', cursosRoutes);
-
-//Catalogos
 app.use('/api/catalogos', catalogoRoutes);
 
 // Conexión a MongoDB
@@ -37,7 +33,7 @@ mongoose.connect(MONGO_URI)
   })
   .catch(err => console.error('❌ Error de conexión:', err));
 
-// Manejo de errores global
+// Manejo de errores
 app.use((err, req, res, next) => {
   console.error(err);
   res.status(500).json({ error: 'Error interno del servidor' });

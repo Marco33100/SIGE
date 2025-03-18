@@ -25,7 +25,7 @@
         </div>
         <div class="text-center md:text-left">
           <h2 class="text-2xl font-bold">{{ empleado.nombreEmpleado }} {{ empleado.apellidoP }} {{ empleado.apellidoM }}</h2>
-          <p class="text-lg opacity-90">{{ empleado.puesto }} - {{ empleado.departamento }}</p>
+          <p class="text-lg opacity-90">{{ empleado.puesto}} - {{ empleado.departamento }}</p>
           <p class="text-sm opacity-80">Clave de empleado: {{ empleado.claveEmpleado }}</p>
         </div>
       </div>
@@ -44,10 +44,17 @@
               <p class="text-gray-600 text-sm font-medium">Sexo</p>
               <p class="text-gray-800">{{ empleado.sexo }}</p>
             </div>
-            <div class="mb-4">
-              <p class="text-gray-600 text-sm font-medium">Rol en el Sistema</p>
-              <p class="text-gray-800">{{ empleado.rol }}</p>
-            </div>
+            <!-- Busca esta sección en el HTML -->
+<div class="mb-4">
+    <p class="text-gray-600 text-sm font-medium">Rol en el Sistema</p>
+    <p class="text-gray-800">
+        {{ 
+            empleado.rol === 1 ? 'Administrador Empleados' : 
+            empleado.rol === 2 ? 'Administrador Cursos y Actividades' : 
+            'Empleado' 
+        }}
+    </p>
+</div>
           </div>
         </div>
   

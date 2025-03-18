@@ -2,6 +2,8 @@ const express = require('express');
 const Empleado = require('../models/Empleado');
 const jwt = require('jsonwebtoken');
 const { autenticarEmpleado } = require('../middleware/authMiddleware');
+const bcrypt = require('bcrypt');
+
 
 const router = express.Router();
 exports.router = router;
@@ -539,42 +541,47 @@ router.get('/personal/:claveEmpleado', async (req, res) => {
             });
         }
         
-        // Buscar empleado por clave
+        // Buscar el empleado por su clave exacta
         const empleado = await Empleado.findOne({ claveEmpleado });
         
-        // Verificar si se encontró
+        // Verificar si se encontró el empleado
         if (!empleado) {
             return res.status(404).json({
                 exito: false,
-                mensaje: `No se encontró empleado con la clave: ${claveEmpleado}`
+                mensaje: `No se encontró ningún empleado con la clave: ${claveEmpleado}`
             });
         }
         
-        // Devolver solo la información personal del empleado
+        // Devolver la información completa del empleado
         res.status(200).json({
             exito: true,
-            mensaje: 'Información personal del empleado obtenida con éxito',
-            datosPersonales: {
+            mensaje: 'Empleado encontrado',
+            empleado: {
                 claveEmpleado: empleado.claveEmpleado,
                 nombreEmpleado: empleado.nombreEmpleado,
                 apellidoP: empleado.apellidoP,
                 apellidoM: empleado.apellidoM,
-                fechaNacimiento: empleado.fechaNacimiento,
+                fechaAlta: empleado.fechaAlta,
                 rfc: empleado.rfc,
+                fechaNacimiento: empleado.fechaNacimiento,
                 sexo: empleado.sexo,
                 fotoEmpleado: empleado.fotoEmpleado,
                 domicilio: empleado.domicilio,
+                departamento: empleado.departamento,
+                puesto: empleado.puesto,
                 telefono: empleado.telefono,
                 correoElectronico: empleado.correoElectronico,
-                referenciasFamiliares: empleado.referenciasFamiliares
+                referenciasFamiliares: empleado.referenciasFamiliares,
+                rol: empleado.rol,
+                activo: empleado.activo
             }
         });
         
     } catch (error) {
-        console.error('Error al consultar información personal:', error);
+        console.error('Error al buscar empleado:', error);
         res.status(500).json({
             exito: false,
-            mensaje: 'Error al obtener la información personal del empleado',
+            mensaje: 'Error al buscar el empleado',
             error: error.message
         });
     }

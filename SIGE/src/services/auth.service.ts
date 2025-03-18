@@ -11,6 +11,17 @@ export class AuthService {
 
   constructor(private http: HttpClient) { }
 
+  // Añade este método a tu AuthService
+getEmpleadoData(): any {
+  const data = localStorage.getItem('empleadoData');
+  return data ? JSON.parse(data) : null;
+}
+
+// Añadir este método también
+setEmpleadoData(empleado: any): void {
+  localStorage.setItem('empleadoData', JSON.stringify(empleado));
+}
+
   // Método para iniciar sesión
   login(username: string, password: string): Observable<any> {
     const body = { claveEmpleado: username, contraseña: password };
@@ -20,11 +31,11 @@ export class AuthService {
         if (response.token && response.empleado) {
           this.setToken(response.token);
           this.setRolUsuario(response.empleado.rol);
+          this.setEmpleadoData(response.empleado); // Añadido para guardar los datos del empleado
         }
       })
     );
   }
-
   // Guardar el token en el localStorage
   setToken(token: string): void {
     localStorage.setItem('authToken', token);
