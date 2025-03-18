@@ -34,7 +34,7 @@ export const routes: Routes = [
       //Seccion del empleado
       {path: 'mis-actividades', component: MisActividadesComponent},
       {path: 'mis-cursos', component:MisCursosComponent},
-      {path: 'agregar-cursos', component:AgregarCursoComponent}
+      {path: 'agregar-cursos', component:AgregarCursoComponent},
       {path: 'visualizar-datos', component: VisualizarDatosComponent },
       {path: 'editar-datos', component: EditarDatosComponent }
 
