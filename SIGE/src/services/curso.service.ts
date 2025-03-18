@@ -2,6 +2,8 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Curso } from '../app/interface/cursosActividades.interface';
+import { AuthService } from './auth.service';
+
 
 @Injectable({
   providedIn: 'root'
@@ -9,10 +11,18 @@ import { Curso } from '../app/interface/cursosActividades.interface';
 export class CursoService {
   private apiUrl = 'http://localhost:3000/api/cursos';
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient,
+    private authService: AuthService
+  ) { }
 
   agregarCurso(curso: Curso): Observable<any> {
     return this.http.post(`${this.apiUrl}/agregarCursoEmpleado`, curso);
+  }
+  //Este es para que el empleado se agregue sus cursos
+  agregarCursoEmpleado(cursoData: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/agregarCursoPEmpleado`, cursoData, {
+      headers: this.authService.getAuthHeaders()
+    });
   }
 
   obtenerEspecialidades(): Observable<any> {
@@ -30,6 +40,14 @@ export class CursoService {
   //Visualizar cursos con filtros CU08
   visualizarCursosConFiltros(filtros: any): Observable<any> {
     return this.http.get(`${this.apiUrl}/visualizarCursos`, { params: filtros });
+  }
+
+  // Nuevo método para visualizar actividades del empleado autenticado
+  visualizarCursoEmpleado(filtros: any = {}): Observable<any> {
+    return this.http.get(`${this.apiUrl}/visualizarCursosE`, {
+      headers: this.authService.getAuthHeaders(),
+      params: filtros
+    });
   }
 
   // CU07: Buscar empleado para gestionar cursos y actividades

@@ -67,10 +67,7 @@ export class HomeComponent implements OnInit {
       case 3: // Empleado
         return [
           { label: 'Inicio', icon: 'home', url: '/home' },
-          { label: 'Mis cursos', icon: 'school', url: '/home/mis-cursos' },
-          { label: 'Mis datos personales', icon: 'app_registration', url: '/home/visualizar-datos' },
-          { label: 'Editar', icon: 'app_registration', url: '/home/editar-datos' }
-          
+          { label: 'Mis cursos', icon: 'school', url: '/home/mis-cursos' }
         ];
       default:
         return [{ label: 'Inicio', icon: 'home', url: '/home' }];

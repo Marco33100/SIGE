@@ -70,6 +70,72 @@ router.post('/agregarCursoEmpleado', async (req, res) => {
     }
 });
 
+// CU05: Agregar cursos a empleado (solo para el empleado autenticado)
+router.post('/agregarCursoPEmpleado', autenticarEmpleado, async (req, res) => {
+    try {
+        // Obtener la clave del empleado autenticado desde el token
+        const claveEmpleado = req.claveEmpleado;
+
+        const { nomCurso, fechaInicio, fechaTermino, tipoDocumento, descripcionCurso, especialidad } = req.body;
+
+        const empleadoExiste = await Empleado.findOne({ claveEmpleado });
+        if (!empleadoExiste) {
+            return res.status(404).json({
+                exito: false,
+                msg: 'El empleado no existe'
+            });
+        }
+
+        if (tipoDocumento) {
+            const documentoExiste = await Documento.findOne({ nomDocumento: tipoDocumento });
+            if (!documentoExiste) {
+                return res.status(404).json({
+                    exito: false,
+                    msg: 'El tipo de documento no existe en el catálogo'
+                });
+            }
+        }
+
+        if (especialidad) {
+            const especialidadExiste = await Especialidad.findOne({ nomEspecialidad: especialidad });
+            if (!especialidadExiste) {
+                return res.status(404).json({
+                    exito: false,
+                    msg: 'La especialidad no existe en el catálogo'
+                });
+            }
+        }
+
+        // Crear el nuevo curso para el empleado
+        const nuevoCursoEmpleado = new CursoEmpleado({
+            claveEmpleado, 
+            nomCurso, 
+            fechaInicio: fechaInicio || Date.now(), 
+            fechaTermino, 
+            tipoDocumento, 
+            descripcionCurso, 
+            especialidad 
+        });
+
+        await nuevoCursoEmpleado.save();
+
+        res.status(201).json({
+            exito: true,
+            msg: 'Curso asignado al empleado con éxito',
+            curso: nuevoCursoEmpleado,
+            empleado: { claveEmpleado }
+        });
+
+    } catch (error) {
+        console.error('Error al agregar curso al empleado:', error);
+        res.status(500).json({
+            exito: false,
+            msg: 'Error interno del servidor',
+            error: error.message
+        });
+    }
+});
+
 // CUI10: Mostrar especialidades
 router.get('/especialidades', async (req, res) => {
     try {
@@ -92,7 +158,6 @@ router.get('/documentos', async (req, res) => {
     }
 });
 
-// CU07: Buscar empleado para gestionar cursos y actividades DUDAAAAAAAAA!!!!
 router.get('/buscarE/:claveEmpleado', async (req, res) => {
     try {
         const { claveEmpleado } = req.params;
