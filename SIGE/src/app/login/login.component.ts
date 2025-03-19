@@ -25,7 +25,6 @@ export class LoginComponent implements OnInit {
   }
 
   animateElements(): void {
-    // Animación para el título
     gsap.from('h1', {
       duration: 1,
       opacity: 0,
@@ -33,13 +32,12 @@ export class LoginComponent implements OnInit {
       ease: 'power2.out',
     });
 
-    // Animación para el contenedor del formulario
     gsap.from('.animate-slide-up', {
       duration: 1,
       opacity: 0,
       y: 50,
       ease: 'power2.out',
-      delay: 0.5, // Retraso para que aparezca después del título
+      delay: 0.5,
     });
   }
 
@@ -50,20 +48,18 @@ export class LoginComponent implements OnInit {
       response => {
         console.log('Login exitoso', response);
 
-        // Guardar el token y el rol en el localStorage
         if (response.token && response.empleado) {
           this.authService.setToken(response.token);
           this.authService.setRolUsuario(response.empleado.rol);
         }
 
         this.successMessage = response.msg;
-        this.router.navigate(['/home']); // Redirigir al home después del login
+        this.router.navigate(['/home']); 
       },
       error => {
         this.errorMessage = error.error.msg || 'Error en el login';
         console.error('Error en el login', error);
 
-        // Animación de error (opcional)
         gsap.from('.text-red-500', {
           duration: 0.5,
           opacity: 0,

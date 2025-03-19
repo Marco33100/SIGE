@@ -15,11 +15,11 @@ import { MatListModule } from '@angular/material/list';
   styleUrls: ['./app.component.css'],
   imports: [
     RouterModule, // Importar RouterModule para usar router-outlet
-    MatSidenavModule, // Importar MatSidenavModule
-    MatToolbarModule, // Importar MatToolbarModule
-    MatIconModule, // Importar MatIconModule
-    MatListModule, // Importar MatListModule
-    RouterOutlet // Asegúrate de importar RouterOutlet para el enrutamiento
+    MatSidenavModule,
+    MatToolbarModule, 
+    MatIconModule,
+    MatListModule,
+    RouterOutlet 
   ]
 })
 export class AppComponent {

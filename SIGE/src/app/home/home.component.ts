@@ -28,16 +28,12 @@ export class HomeComponent implements OnInit {
   constructor(private authService: AuthService) {}
   
   ngOnInit() {
-    // Recupera el rol del usuario desde el localStorage
     this.usuarioRol = this.authService.getRolUsuario();
     
-    // Si el rol no es válido, redirige al login o muestra un mensaje de error
     if (this.usuarioRol === 0) {
       console.error('No se pudo obtener el rol del usuario. Asegúrate de que el usuario esté autenticado.');
-      // Aquí podrías agregar una redirección a la página de login
     }
     
-    // Llama al método para obtener el menú basado en el rol
     this.sidebarItems = this.getMenuPorRol(this.usuarioRol);
   }
   
@@ -59,7 +55,7 @@ export class HomeComponent implements OnInit {
           { label: 'Inicio', icon: 'home', url: '/home' },
           { label: 'Agregar actividades', icon: 'add', url: '/home/agregar-actividad' },
           { label: 'Agregar cursos', icon: 'add_circle', url: '/home/agregar-curso' },
-          { label: 'Empleados', icon: 'groups', url: '/home/buscar-empleadoCA' },
+          { label: 'Gestion de Empleados', icon: 'groups', url: '/home/buscar-empleadoCA' },
           {label: 'Visualizar Actividades', icon: 'visibility', url: '/home/visualizar-actividad'},
           {label: 'Visualizar Cursos', icon:'visibility', url: '/home/visualizar-curso'},
           { label: 'Mis datos personales', icon: 'app_registration', url: '/home/visualizar-datos' },

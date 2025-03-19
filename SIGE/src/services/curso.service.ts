@@ -55,10 +55,6 @@ export class CursoService {
     return this.http.get(`${this.apiUrl}/buscarE/${claveEmpleado}`);
   }
 
-  // CUI14: Mostrar opciones "Actividades" o "Cursos"
-  obtenerOpciones(): Observable<any> {
-    return this.http.get(`${this.apiUrl}/opciones`);
-  }
 
   // CUE12: Visualizar cursos del empleado
   visualizarCursosEmpleado(claveEmpleado: string): Observable<any> {

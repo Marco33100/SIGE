@@ -4,8 +4,9 @@ import { HttpClientModule } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormsModule } from '@angular/forms';
 import Swal from 'sweetalert2';
-import { switchMap } from 'rxjs/operators';
-
+import { switchMap, debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { Subject } from 'rxjs';
+import { EmpleadoService } from '../../../services/empleados.service';
 
 @Component({
   selector: 'app-buscar-empleado-curso',
@@ -22,7 +23,11 @@ export class BuscarEmpleadoCursoComponent implements OnInit {
   actividades: any[] = [];
   cargando: boolean = false;
   datosPersonales: any = null;
-  
+
+  // Variables para la búsqueda progresiva
+  resultadosBusqueda: any[] = [];
+  busquedaSubject = new Subject<string>();
+
   // Para edición
   formularioEdicion: FormGroup;
   editando: boolean = false;
@@ -31,12 +36,13 @@ export class BuscarEmpleadoCursoComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private cursoService: CursoService,
+    private empleadoService: EmpleadoService
   ) {
     this.formularioBusqueda = this.fb.group({
       terminoBusqueda: ['', Validators.required],
       tipo: ['cursos'] // Por defecto, cursos
     });
-    
+
     this.formularioEdicion = this.fb.group({
       // Campos para cursos
       fechaInicio: [''],
@@ -44,7 +50,7 @@ export class BuscarEmpleadoCursoComponent implements OnInit {
       tipoDocumento: [''],
       descripcionCurso: [''],
       especialidad: [''],
-      
+
       // Campos para actividades
       descripcionAct: [''],
       estatusActividad: ['']
@@ -55,13 +61,22 @@ export class BuscarEmpleadoCursoComponent implements OnInit {
   documentosList: any[] = [];
   submitted = false; // Variable para controlar la validación
 
-
-
   ngOnInit(): void {
     this.cargarDocumentos();
     this.cargarEspecialidades();
+
+    this.busquedaSubject.pipe(
+      debounceTime(300), 
+      distinctUntilChanged() 
+    ).subscribe(termino => {
+      if (termino) {
+        this.buscarEmpleadosProgresivo(termino);
+      } else {
+        this.resultadosBusqueda = [];
+      }
+    });
   }
-  
+
   cargarDocumentos(): void {
     this.cursoService.obtenerTiposDocumentos().subscribe({
       next: (data) => {
@@ -72,7 +87,7 @@ export class BuscarEmpleadoCursoComponent implements OnInit {
       }
     });
   }
-  
+
   cargarEspecialidades(): void {
     this.cursoService.obtenerEspecialidades().subscribe({
       next: (data) => {
@@ -84,38 +99,41 @@ export class BuscarEmpleadoCursoComponent implements OnInit {
     });
   }
 
+  // Método para manejar cambios en el campo de búsqueda
+  onInputChange(event: Event): void {
+    const terminoBusqueda = (event.target as HTMLInputElement).value;
+    this.busquedaSubject.next(terminoBusqueda);
+  }
 
-  buscarEmpleado(): void {
-    this.cargando = true;
-    this.empleadoSeleccionado = null;
-    this.datosPersonales = null; // Reiniciar los datos personales
-  
-    const terminoBusqueda = this.formularioBusqueda.get('terminoBusqueda')?.value;
-    if (!terminoBusqueda) {
-      Swal.fire('Error', 'Por favor ingrese una clave de empleado', 'error');
-      this.cargando = false;
-      return;
-    }
-  
-    // Buscar empleado y luego obtener información personal
-    this.cursoService.buscarEmpleado(terminoBusqueda).pipe(
-      switchMap((respuesta) => {
-        if (respuesta) {
-          this.empleadoSeleccionado = respuesta;
-  
-          // Obtener información personal del empleado
-          return this.cursoService.obtenerInformacionPersonal(terminoBusqueda);
+  // Método para buscar empleados de manera progresiva
+  buscarEmpleadosProgresivo(termino: string): void {
+    this.empleadoService.buscarEmpleados(termino).subscribe({
+      next: (respuesta) => {
+        if (respuesta.exito) {
+          this.resultadosBusqueda = respuesta.empleados;
         } else {
-          Swal.fire('Error', 'No se encontraron empleados', 'error');
-          this.cargando = false;
-          throw new Error('No se encontraron empleados');
+          this.resultadosBusqueda = [];
         }
-      })
-    ).subscribe({
+      },
+      error: (error) => {
+        Swal.fire('Error', 'Error al buscar empleados: ' + (error.error?.msg || 'Error desconocido'), 'error');
+        this.resultadosBusqueda = [];
+      }
+    });
+  }
+
+  // Método para seleccionar un empleado de la lista
+  seleccionarEmpleado(empleado: any): void {
+    this.empleadoSeleccionado = empleado;
+    this.resultadosBusqueda = []; // Limpiar la lista de resultados
+    this.formularioBusqueda.get('terminoBusqueda')?.setValue(empleado.claveEmpleado);
+
+    // Obtener información personal del empleado seleccionado
+    this.cursoService.obtenerInformacionPersonal(empleado.claveEmpleado).subscribe({
       next: (respuestaPersonal) => {
-        this.datosPersonales = respuestaPersonal.datosPersonales; // Asignar los datos personales
+        this.datosPersonales = respuestaPersonal.datosPersonales;
         this.cargando = false;
-  
+
         // Cargar cursos o actividades según el tipo seleccionado
         this.tipoOpcion = this.formularioBusqueda.get('tipo')?.value || 'cursos';
         if (this.tipoOpcion === 'cursos') {
@@ -127,9 +145,10 @@ export class BuscarEmpleadoCursoComponent implements OnInit {
       error: (error) => {
         Swal.fire('Error', 'Error al obtener información personal: ' + (error.error?.msg || 'Error desconocido'), 'error');
         this.cargando = false;
-      },
+      }
     });
   }
+
 
   cargarCursosEmpleado(idEmpleado: string): void {
     this.cargando = true;
