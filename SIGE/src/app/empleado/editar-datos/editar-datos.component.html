@@ -1,0 +1,296 @@
+<div class="container mt-4">
+    <h2>Editar Datos del Empleado</h2>
+    
+    <div *ngIf="errorMessage" class="alert alert-danger">
+      {{ errorMessage }}
+    </div>
+    
+    <div *ngIf="successMessage" class="alert alert-success">
+      {{ successMessage }}
+    </div>
+  
+    <form [formGroup]="editarForm" (ngSubmit)="onSubmit()" class="mt-3">
+      <div class="row">
+        <!-- Información personal (no editable) -->
+        <div class="col-md-6 mb-3">
+          <label class="form-label">Clave de Empleado</label>
+          <input type="text" class="form-control" formControlName="claveEmpleado" readonly>
+          <div class="text-muted small">No se puede modificar</div>
+        </div>
+  
+        <div class="col-md-6 mb-3">
+          <label class="form-label">Nombre</label>
+          <input type="text" class="form-control" formControlName="nombreEmpleado" readonly>
+          <div class="text-muted small">No se puede modificar</div>
+        </div>
+  
+        <div class="col-md-6 mb-3">
+          <label class="form-label">Apellido Paterno</label>
+          <input type="text" class="form-control" formControlName="apellidoP" readonly>
+          <div class="text-muted small">No se puede modificar</div>
+        </div>
+  
+        <div class="col-md-6 mb-3">
+          <label class="form-label">Apellido Materno</label>
+          <input type="text" class="form-control" formControlName="apellidoM" readonly>
+          <div class="text-muted small">No se puede modificar</div>
+        </div>
+  
+        <div class="col-md-6 mb-3">
+          <label class="form-label">RFC</label>
+          <input type="text" class="form-control" formControlName="rfc" readonly>
+          <div class="text-muted small">No se puede modificar</div>
+        </div>
+  
+        <div class="col-md-6 mb-3">
+          <label class="form-label">Fecha de Nacimiento</label>
+          <input type="date" class="form-control" formControlName="fechaNacimiento" readonly>
+          <div class="text-muted small">No se puede modificar</div>
+        </div>
+  
+        <div class="col-md-6 mb-3">
+          <label class="form-label">Fecha de Alta</label>
+          <input type="date" class="form-control" formControlName="fechaAlta" readonly>
+          <div class="text-muted small">No se puede modificar</div>
+        </div>
+  
+        <!-- Campos editables -->
+        <div class="col-md-6 mb-3">
+          <label class="form-label">Contraseña (solo si desea cambiarla)</label>
+          <input type="password" class="form-control" formControlName="contraseña">
+          <div *ngIf="formulario['contraseña'].dirty && formulario['contraseña'].errors?.['minlength']" class="text-danger">
+            La contraseña debe tener al menos 8 caracteres
+          </div>
+        </div>
+  
+        <div class="col-md-6 mb-3">
+          <label class="form-label">Sexo</label>
+          <select class="form-select" formControlName="sexo">
+            <option value="">Seleccione una opción</option>
+            <option *ngFor="let opcion of sexoOpciones" [value]="opcion">{{ opcion }}</option>
+          </select>
+          <div *ngIf="formulario['sexo'].dirty && formulario['sexo'].errors?.['required']" class="text-danger">
+            Este campo es requerido
+          </div>
+        </div>
+  
+        <div class="col-md-6 mb-3">
+          <label class="form-label">Foto</label>
+          <input type="text" class="form-control" formControlName="fotoEmpleado">
+        </div>
+  
+        <!-- Domicilio -->
+        <div class="col-12 mt-3">
+          <h4>Domicilio</h4>
+          <div class="row" formGroupName="domicilio">
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Calle</label>
+              <input type="text" class="form-control" formControlName="calle">
+              <div *ngIf="editarForm.get('domicilio.calle')?.dirty && editarForm.get('domicilio.calle')?.errors?.['required']" class="text-danger">
+                Campo requerido
+              </div>
+            </div>
+  
+            <div class="col-md-3 mb-3">
+              <label class="form-label">Número Interior</label>
+              <input type="text" class="form-control" formControlName="numInterior">
+            </div>
+  
+            <div class="col-md-3 mb-3">
+              <label class="form-label">Número Exterior</label>
+              <input type="text" class="form-control" formControlName="numExterior">
+              <div *ngIf="editarForm.get('domicilio.numExterior')?.dirty && editarForm.get('domicilio.numExterior')?.errors?.['required']" class="text-danger">
+                Campo requerido
+              </div>
+            </div>
+  
+            <div class="col-md-4 mb-3">
+              <label class="form-label">Colonia</label>
+              <input type="text" class="form-control" formControlName="colonia">
+              <div *ngIf="editarForm.get('domicilio.colonia')?.dirty && editarForm.get('domicilio.colonia')?.errors?.['required']" class="text-danger">
+                Campo requerido
+              </div>
+            </div>
+  
+            <div class="col-md-4 mb-3">
+              <label class="form-label">Código Postal</label>
+              <input type="text" class="form-control" formControlName="codigoPostal">
+              <div *ngIf="editarForm.get('domicilio.codigoPostal')?.dirty && editarForm.get('domicilio.codigoPostal')?.errors?.['required']" class="text-danger">
+                Campo requerido
+              </div>
+              <div *ngIf="editarForm.get('domicilio.codigoPostal')?.dirty && editarForm.get('domicilio.codigoPostal')?.errors?.['pattern']" class="text-danger">
+                Debe ser un código postal válido de 5 dígitos
+              </div>
+            </div>
+  
+            <div class="col-md-4 mb-3">
+              <label class="form-label">Ciudad</label>
+              <input type="text" class="form-control" formControlName="ciudad">
+              <div *ngIf="editarForm.get('domicilio.ciudad')?.dirty && editarForm.get('domicilio.ciudad')?.errors?.['required']" class="text-danger">
+                Campo requerido
+              </div>
+            </div>
+          </div>
+        </div>
+  
+        <!-- Información laboral -->
+        <div class="col-md-6 mb-3">
+          <label class="form-label">Departamento</label>
+          <input type="text" class="form-control" formControlName="departamento">
+          <div *ngIf="formulario['departamento'].dirty && formulario['departamento'].errors?.['required']" class="text-danger">
+            Campo requerido
+          </div>
+        </div>
+  
+        <div class="col-md-6 mb-3">
+          <label class="form-label">Puesto</label>
+          <input type="text" class="form-control" formControlName="puesto">
+          <div *ngIf="formulario['puesto'].dirty && formulario['puesto'].errors?.['required']" class="text-danger">
+            Campo requerido
+          </div>
+        </div>
+  
+        <!-- Teléfonos -->
+        <div class="col-12 mt-3">
+          <h4>Teléfonos</h4>
+          <div formArrayName="telefono">
+            <div *ngFor="let tel of telefonos.controls; let i = index" class="row mb-2">
+              <div class="col-md-10">
+                <input type="text" [formControlName]="i" class="form-control" placeholder="Teléfono">
+                <div *ngIf="telefonos.at(i).dirty && telefonos.at(i).errors?.['required']" class="text-danger">
+                  Campo requerido
+                </div>
+                <div *ngIf="telefonos.at(i).dirty && telefonos.at(i).errors?.['pattern']" class="text-danger">
+                  Debe ser un número de 10 dígitos
+                </div>
+              </div>
+              <div class="col-md-2">
+                <button type="button" class="btn btn-danger" (click)="eliminarTelefono(i)">Eliminar</button>
+              </div>
+            </div>
+            <button type="button" class="btn btn-secondary mt-2" (click)="agregarTelefono()">Agregar Teléfono</button>
+          </div>
+        </div>
+  
+        <!-- Correos electrónicos -->
+        <div class="col-12 mt-3">
+          <h4>Correos Electrónicos</h4>
+          <div formArrayName="correoElectronico">
+            <div *ngFor="let correo of correosElectronicos.controls; let i = index" class="row mb-2">
+              <div class="col-md-10">
+                <input type="email" [formControlName]="i" class="form-control" placeholder="Correo Electrónico">
+                <div *ngIf="correosElectronicos.at(i).dirty && correosElectronicos.at(i).errors?.['required']" class="text-danger">
+                  Campo requerido
+                </div>
+                <div *ngIf="correosElectronicos.at(i).dirty && correosElectronicos.at(i).errors?.['email']" class="text-danger">
+                  Debe ser un correo electrónico válido
+                </div>
+              </div>
+              <div class="col-md-2">
+                <button type="button" class="btn btn-danger" (click)="eliminarCorreo(i)">Eliminar</button>
+              </div>
+            </div>
+            <button type="button" class="btn btn-secondary mt-2" (click)="agregarCorreo()">Agregar Correo</button>
+          </div>
+        </div>
+  
+        <!-- Referencias familiares -->
+        <div class="col-12 mt-3">
+          <h4>Referencias Familiares</h4>
+          <div formArrayName="referenciasFamiliares">
+            <div *ngFor="let ref of referencias.controls; let i = index" class="card mb-3 p-3">
+              <div [formGroupName]="i">
+                <div class="row mb-2">
+                  <div class="col-md-6">
+                    <label class="form-label">Nombre Completo</label>
+                    <input type="text" formControlName="nomCompleto" class="form-control">
+                    <div *ngIf="ref.get('nomCompleto')?.dirty && ref.get('nomCompleto')?.errors?.['required']" class="text-danger">
+                      Campo requerido
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Parentesco</label>
+                    <input type="text" formControlName="parentesco" class="form-control">
+                    <div *ngIf="ref.get('parentesco')?.dirty && ref.get('parentesco')?.errors?.['required']" class="text-danger">
+                      Campo requerido
+                    </div>
+                  </div>
+                </div>
+  
+                <!-- Teléfonos de referencia -->
+                <label class="form-label">Teléfonos</label>
+                <div formArrayName="telefono">
+                  <div *ngFor="let tel of getTelefonosReferencia(i).controls; let j = index" class="row mb-2">
+                    <div class="col-md-10">
+                      <input type="text" [formControlName]="j" class="form-control" placeholder="Teléfono">
+                      <div *ngIf="tel.dirty && tel.errors?.['required']" class="text-danger">
+                        Campo requerido
+                      </div>
+                      <div *ngIf="tel.dirty && tel.errors?.['pattern']" class="text-danger">
+                        Debe ser un número de 10 dígitos
+                      </div>
+                    </div>
+                    <div class="col-md-2">
+                      <button type="button" class="btn btn-danger btn-sm" (click)="eliminarTelefonoReferencia(i, j)">Eliminar</button>
+                    </div>
+                  </div>
+                  <button type="button" class="btn btn-outline-secondary btn-sm mb-3" (click)="agregarTelefonoReferencia(i)">Agregar Teléfono</button>
+                </div>
+  
+                <!-- Correos de referencia -->
+                <label class="form-label">Correos</label>
+                <div formArrayName="correo">
+                  <div *ngFor="let correo of getCorreosReferencia(i).controls; let j = index" class="row mb-2">
+                    <div class="col-md-10">
+                      <input type="email" [formControlName]="j" class="form-control" placeholder="Correo Electrónico">
+                      <div *ngIf="correo.dirty && correo.errors?.['required']" class="text-danger">
+                        Campo requerido
+                      </div>
+                      <div *ngIf="correo.dirty && correo.errors?.['email']" class="text-danger">
+                        Debe ser un correo electrónico válido
+                      </div>
+                    </div>
+                    <div class="col-md-2">
+                      <button type="button" class="btn btn-danger btn-sm" (click)="eliminarCorreoReferencia(i, j)">Eliminar</button>
+                    </div>
+                  </div>
+                  <button type="button" class="btn btn-outline-secondary btn-sm" (click)="agregarCorreoReferencia(i)">Agregar Correo</button>
+                </div>
+              </div>
+              
+              <div class="mt-2 d-flex justify-content-end">
+                <button type="button" class="btn btn-danger" (click)="eliminarReferencia(i)">Eliminar Referencia</button>
+              </div>
+            </div>
+            <button type="button" class="btn btn-secondary mt-2" (click)="agregarReferencia()">Agregar Referencia</button>
+        </div>
+      </div>
+
+      <!-- Rol y estado solo para administradores -->
+      <div class="col-md-6 mb-3">
+        <label class="form-label">Rol</label>
+        <select class="form-select" formControlName="rol">
+          <option *ngFor="let opcion of rolOpciones" [value]="opcion.valor">{{ opcion.nombre }}</option>
+        </select>
+        <div *ngIf="formulario['rol'].dirty && formulario['rol'].errors?.['required']" class="text-danger">
+          Campo requerido
+        </div>
+      </div>
+
+      <div class="col-md-6 mb-3">
+        <label class="form-label">Estado</label>
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" formControlName="activo" id="activoCheck">
+          <label class="form-check-label" for="activoCheck">
+            Empleado activo
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div class="d-flex justify-content-between mt-4">
+      <button type="button" class="btn btn-secondary" routerLink="/perfil">Cancelar</button>
+      <button type="submit" class="btn btn-primary" [disabled]="editarForm.invalid">Guardar Cambios</button>
+    </div>
+  </form>
+</div>

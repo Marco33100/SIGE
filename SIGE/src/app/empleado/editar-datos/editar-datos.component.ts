@@ -1,9 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { EmpleadoService } from '../../../services/empleados.service';
 import { AuthService } from '../../../services/auth.service';
+import { Observable, catchError, of } from 'rxjs';
+import { FormArray, FormControl } from '@angular/forms';
 
 @Component({
   selector: 'app-editar-datos',
@@ -13,344 +15,277 @@ import { AuthService } from '../../../services/auth.service';
   styleUrls: ['./editar-datos.component.css']
 })
 export class EditarDatosComponent implements OnInit {
-  empleadoForm!: FormGroup;
-  claveEmpleado: string = '';
-  cargando: boolean = false;
-  mensajeError: string = '';
-  mensajeExito: string = '';
-  opcionesSexo = ['Masculino', 'Femenino', 'Otro'];
-  opcionesRol = [
-    { valor: 1, etiqueta: 'Administrador' },
-    { valor: 2, etiqueta: 'Supervisor' },
-    { valor: 3, etiqueta: 'Empleado normal' }
+  editarForm!: FormGroup;
+  claveEmpleado!: string;
+  errorMessage: string = '';
+  successMessage: string = '';
+  sexoOpciones = ['Masculino', 'Femenino', 'Otro'];
+  rolOpciones = [
+    { valor: 1, nombre: 'Administrador' },
+    { valor: 2, nombre: 'Supervisor' },
+    { valor: 3, nombre: 'Empleado normal' }
   ];
+  datosOriginales: any;
 
   constructor(
     private fb: FormBuilder,
     private empleadoService: EmpleadoService,
     private authService: AuthService,
-    private ruta: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private route: ActivatedRoute
   ) { }
 
   ngOnInit(): void {
-    this.inicializarFormulario();
-    this.ruta.params.subscribe(params => {
-      if (params['id']) {
-        this.claveEmpleado = params['id'];
-        this.cargarDatosEmpleado();
-      } else {
-        // Intentar obtener datos del empleado desde la sesión
-        const empleadoData = this.authService.getEmpleadoData();
-        const empleadoActual = empleadoData || this.empleadoService.obtenerSesionEmpleado();
-        
-        if (empleadoActual && empleadoActual.claveEmpleado) {
-          this.claveEmpleado = empleadoActual.claveEmpleado;
-          this.cargarDatosEmpleado();
-        } else {
-          this.mensajeError = 'No se pudo identificar al empleado actual';
-          console.error(this.mensajeError);
-          
-          // Redirigir al login si no hay sesión
-          setTimeout(() => {
-            this.router.navigate(['/login']);
-          }, 3000);
-        }
-      }
-    });
-  }
+    if (!this.empleadoService.estaLogueado()) {
+      this.router.navigate(['/login']);
+      return;
+    }
 
-  inicializarFormulario(): void {
-    this.empleadoForm = this.fb.group({
-      nombreEmpleado: ['', Validators.required],
-      apellidoP: ['', Validators.required],
-      apellidoM: [''],
-      fechaNacimiento: ['', Validators.required],
-      sexo: ['', Validators.required],
-      rfc: ['', Validators.pattern(/^[A-Z&Ñ]{4}[0-9]{6}[A-Z0-9]{3}$/)],
-      domicilio: this.fb.group({
-        calle: ['', Validators.required],
-        numInterior: [''],
-        numExterior: [''],
-        colonia: ['', Validators.required],
-        codigoPostal: ['', [Validators.required, Validators.pattern(/^\d{5}$/)]],
-        ciudad: ['', Validators.required]
-      }),
-      departamento: ['', Validators.required],
-      puesto: ['', Validators.required],
-      telefono: this.fb.array([this.fb.control('', Validators.pattern(/^\d{10}$/))]),
-      correoElectronico: this.fb.array([this.fb.control('', Validators.email)]),
-      referenciasFamiliares: this.fb.array([]),
-      rol: [3, Validators.required],
-      activo: [true]
-    });
-  }
-
-  cargarDatosEmpleado(): void {
-    this.cargando = true;
-    console.log('Iniciando carga de datos del empleado');
-    this.mensajeError = '';
-    
-    // Verificar que tenemos el token antes de hacer la petición
-    const token = this.authService.getToken();
-    if (!token) {
-      this.mensajeError = 'No se encontró token de autenticación. Por favor, inicie sesión nuevamente.';
-      this.cargando = false;
-      
-      // Redirigir al login
-      setTimeout(() => {
-        this.router.navigate(['/login']);
-      }, 3000);
-      
+    // Obtener datos del empleado actual
+    const empleadoData = this.empleadoService.obtenerSesionEmpleado();
+    if (!empleadoData) {
+      this.errorMessage = 'No se pudieron obtener los datos del empleado.';
       return;
     }
     
-    this.empleadoService.obtenerEmpleado(this.claveEmpleado).subscribe({
-      next: (datos) => {
-        this.actualizarFormulario(datos);
-        console.log('Datos recibidos correctamente:', datos);
-        this.cargando = false;
-      },
-      error: (error) => {
-        this.mensajeError = 'Error al cargar los datos del empleado';
-        console.error('Error al cargar empleado', error);
-        this.cargando = false;
-      }
+    this.claveEmpleado = empleadoData.claveEmpleado;
+    this.datosOriginales = { ...empleadoData };
+
+    // Inicializar el formulario con los datos actuales
+    this.inicializarFormulario(empleadoData);
+  }
+
+  private inicializarFormulario(datosIniciales: any): void {
+    this.editarForm = this.fb.group({
+      // Campos que no se pueden modificar (disabled)
+      claveEmpleado: [{ value: datosIniciales.claveEmpleado || '', disabled: true }],
+      nombreEmpleado: [{ value: datosIniciales.nombreEmpleado || '', disabled: true }],
+      apellidoP: [{ value: datosIniciales.apellidoP || '', disabled: true }],
+      apellidoM: [{ value: datosIniciales.apellidoM || '', disabled: true }],
+      fechaAlta: [{ value: this.formatDate(datosIniciales.fechaAlta) || '', disabled: true }],
+      rfc: [{ value: datosIniciales.rfc || '', disabled: true }],
+      fechaNacimiento: [{ value: this.formatDate(datosIniciales.fechaNacimiento) || '', disabled: true }],
+      
+      // Campos que sí se pueden modificar
+      contraseña: ['', [Validators.minLength(8)]], // opcional
+      sexo: [datosIniciales.sexo || '', Validators.required],
+      fotoEmpleado: [datosIniciales.fotoEmpleado || ''],
+      domicilio: this.fb.group({
+        calle: [datosIniciales.domicilio?.calle || '', Validators.required],
+        numInterior: [datosIniciales.domicilio?.numInterior || ''],
+        numExterior: [datosIniciales.domicilio?.numExterior || '', Validators.required],
+        colonia: [datosIniciales.domicilio?.colonia || '', Validators.required],
+        codigoPostal: [datosIniciales.domicilio?.codigoPostal || '', [Validators.required, Validators.pattern(/^\d{5}$/)]],
+        ciudad: [datosIniciales.domicilio?.ciudad || '', Validators.required]
+      }),
+      departamento: [datosIniciales.departamento || '', Validators.required],
+      puesto: [datosIniciales.puesto || '', Validators.required],
+      telefono: this.fb.array(
+        this.crearArregloControles(datosIniciales.telefono || [''], [Validators.required, Validators.pattern(/^[0-9]{10}$/)])
+      ),
+      correoElectronico: this.fb.array(
+        this.crearArregloControles(datosIniciales.correoElectronico || [''], [Validators.required, Validators.email])
+      ),
+      referenciasFamiliares: this.fb.array(
+        (datosIniciales.referenciasFamiliares?.length ? datosIniciales.referenciasFamiliares : [{}])
+          .map((ref: any) => this.crearReferenciaGrupo(ref))
+      ),
+      rol: [datosIniciales.rol || 3, Validators.required],
+      activo: [datosIniciales.activo !== undefined ? datosIniciales.activo : true]
     });
   }
 
-  actualizarFormulario(empleado: any): void {
-    // Reiniciar los arrays del formulario antes de cargar los datos
-    this.reiniciarArraysFormulario();
-    console.log('Datos del empleado recibidos:', empleado);
+  private crearArregloControles(valores: any[], validadores: any[]): FormControl[] {
+    if (!Array.isArray(valores) || valores.length === 0) {
+      return [this.fb.control('', validadores)];
+    }
+    return valores.map(valor => this.fb.control(valor, validadores));
+  }
 
-    // Actualizar campos básicos del formulario
-    this.empleadoForm.patchValue({
-      nombreEmpleado: empleado.nombreEmpleado,
-      apellidoP: empleado.apellidoP,
-      apellidoM: empleado.apellidoM,
-      fechaNacimiento: this.formatearFecha(empleado.fechaNacimiento),
-      sexo: empleado.sexo,
-      rfc: empleado.rfc,
-      domicilio: empleado.domicilio,
-      departamento: empleado.departamento,
-      puesto: empleado.puesto,
-      rol: empleado.rol,
-      activo: empleado.activo
+  private crearReferenciaGrupo(ref: any): FormGroup {
+    return this.fb.group({
+      nomCompleto: [ref.nomCompleto || '', Validators.required],
+      parentesco: [ref.parentesco || '', Validators.required],
+      telefono: this.fb.array(
+        this.crearArregloControles(ref.telefono || [''], [Validators.required, Validators.pattern(/^[0-9]{10}$/)])
+      ),
+      correo: this.fb.array(
+        this.crearArregloControles(ref.correo || [''], [Validators.required, Validators.email])
+      )
     });
-
-    // Agregar números de teléfono
-    const arrayTelefono = this.empleadoForm.get('telefono') as FormArray;
-    if (empleado.telefono && empleado.telefono.length) {
-      // Primero limpiamos el array
-      while (arrayTelefono.length) {
-        arrayTelefono.removeAt(0);
-      }
-      
-      // Luego agregamos los teléfonos existentes
-      empleado.telefono.forEach((tel: string) => {
-        arrayTelefono.push(this.fb.control(tel, Validators.pattern(/^\d{10}$/)));
-      });
-    }
-
-    // Agregar direcciones de correo electrónico
-    const arrayCorreo = this.empleadoForm.get('correoElectronico') as FormArray;
-    if (empleado.correoElectronico && empleado.correoElectronico.length) {
-      // Primero limpiamos el array
-      while (arrayCorreo.length) {
-        arrayCorreo.removeAt(0);
-      }
-      
-      // Luego agregamos los correos existentes
-      empleado.correoElectronico.forEach((email: string) => {
-        arrayCorreo.push(this.fb.control(email, Validators.email));
-      });
-    }
-
-    // Agregar referencias familiares
-    const arrayRefFam = this.empleadoForm.get('referenciasFamiliares') as FormArray;
-    if (empleado.referenciasFamiliares && empleado.referenciasFamiliares.length) {
-      empleado.referenciasFamiliares.forEach((ref: any) => {
-        const telefonos = this.fb.array([]);
-        const correos = this.fb.array([]);
-        
-        // Agregar teléfonos de la referencia familiar
-        if (ref.telefono && ref.telefono.length) {
-          ref.telefono.forEach((tel: string) => {
-            telefonos.push(this.fb.control(tel, Validators.pattern(/^\d{10}$/)));
-          });
-        } else {
-          telefonos.push(this.fb.control('', Validators.pattern(/^\d{10}$/)));
-        }
-        
-        // Agregar correos de la referencia familiar
-        if (ref.correo && ref.correo.length) {
-          ref.correo.forEach((email: string) => {
-            correos.push(this.fb.control(email, Validators.email));
-          });
-        } else {
-          correos.push(this.fb.control('', Validators.email));
-        }
-        
-        arrayRefFam.push(this.fb.group({
-          nomCompleto: [ref.nomCompleto, Validators.required],
-          parentesco: [ref.parentesco, Validators.required],
-          telefono: telefonos,
-          correo: correos
-        }));
-      });
-    }
   }
 
-  reiniciarArraysFormulario(): void {
-    const arrayTelefono = this.empleadoForm.get('telefono') as FormArray;
-    const arrayCorreo = this.empleadoForm.get('correoElectronico') as FormArray;
-    const arrayRefFam = this.empleadoForm.get('referenciasFamiliares') as FormArray;
-    
-    // Resetear a un solo control vacío
-    while (arrayTelefono.length > 0) {
-      arrayTelefono.removeAt(0);
-    }
-    arrayTelefono.push(this.fb.control('', Validators.pattern(/^\d{10}$/)));
-    
-    while (arrayCorreo.length > 0) {
-      arrayCorreo.removeAt(0);
-    }
-    arrayCorreo.push(this.fb.control('', Validators.email));
-    
-    while (arrayRefFam.length > 0) {
-      arrayRefFam.removeAt(0);
-    }
+  private formatDate(date: any): string {
+    if (!date) return '';
+    const d = new Date(date);
+    const year = d.getFullYear();
+    const month = ('0' + (d.getMonth() + 1)).slice(-2);
+    const day = ('0' + d.getDate()).slice(-2);
+    return `${year}-${month}-${day}`;
   }
 
-  // Métodos auxiliares para los arrays del formulario
-  get arrayTelefono() {
-    return this.empleadoForm.get('telefono') as FormArray;
-  }
-
-  get arrayCorreo() {
-    return this.empleadoForm.get('correoElectronico') as FormArray;
-  }
-
-  get arrayReferenciasFamiliares() {
-    return this.empleadoForm.get('referenciasFamiliares') as FormArray;
+  // Para teléfonos
+  get telefonos(): FormArray {
+    return this.editarForm.get('telefono') as FormArray;
   }
 
   agregarTelefono(): void {
-    this.arrayTelefono.push(this.fb.control('', Validators.pattern(/^\d{10}$/)));
+    this.telefonos.push(this.fb.control('', [Validators.required, Validators.pattern(/^[0-9]{10}$/)]));
+  }
+
+  eliminarTelefono(index: number): void {
+    if (this.telefonos.length > 1) {
+      this.telefonos.removeAt(index);
+    }
+  }
+
+  // Para correos electrónicos
+  get correosElectronicos(): FormArray {
+    return this.editarForm.get('correoElectronico') as FormArray;
   }
 
   agregarCorreo(): void {
-    this.arrayCorreo.push(this.fb.control('', Validators.email));
+    this.correosElectronicos.push(this.fb.control('', [Validators.required, Validators.email]));
   }
 
-  eliminarTelefono(indice: number): void {
-    if (this.arrayTelefono.length > 1) {
-      this.arrayTelefono.removeAt(indice);
+  eliminarCorreo(index: number): void {
+    if (this.correosElectronicos.length > 1) {
+      this.correosElectronicos.removeAt(index);
     }
   }
 
-  eliminarCorreo(indice: number): void {
-    if (this.arrayCorreo.length > 1) {
-      this.arrayCorreo.removeAt(indice);
-    }
+  // Para referencias familiares
+  get referencias(): FormArray {
+    return this.editarForm.get('referenciasFamiliares') as FormArray;
   }
 
   agregarReferencia(): void {
-    const nuevaReferencia = this.fb.group({
-      nomCompleto: ['', Validators.required],
-      parentesco: ['', Validators.required],
-      telefono: this.fb.array([this.fb.control('', Validators.pattern(/^\d{10}$/))]),
-      correo: this.fb.array([this.fb.control('', Validators.email)])
-    });
-    this.arrayReferenciasFamiliares.push(nuevaReferencia);
+    this.referencias.push(this.crearReferenciaGrupo({}));
   }
 
-  eliminarReferencia(indice: number): void {
-    this.arrayReferenciasFamiliares.removeAt(indice);
+  eliminarReferencia(index: number): void {
+    if (this.referencias.length > 1) {
+      this.referencias.removeAt(index);
+    }
   }
 
-  agregarTelefonoReferencia(indiceReferencia: number): void {
-    const referencia = this.arrayReferenciasFamiliares.at(indiceReferencia) as FormGroup;
-    const telefonos = referencia.get('telefono') as FormArray;
-    telefonos.push(this.fb.control('', Validators.pattern(/^\d{10}$/)));
+  // Para teléfonos de referencias
+  getTelefonosReferencia(referenciaIndex: number): FormArray {
+    return this.referencias.at(referenciaIndex).get('telefono') as FormArray;
   }
 
-  eliminarTelefonoReferencia(indiceReferencia: number, indiceTelefono: number): void {
-    const referencia = this.arrayReferenciasFamiliares.at(indiceReferencia) as FormGroup;
-    const telefonos = referencia.get('telefono') as FormArray;
+  agregarTelefonoReferencia(referenciaIndex: number): void {
+    const telefonos = this.getTelefonosReferencia(referenciaIndex);
+    telefonos.push(this.fb.control('', [Validators.required, Validators.pattern(/^[0-9]{10}$/)]));
+  }
+
+  eliminarTelefonoReferencia(referenciaIndex: number, telefonoIndex: number): void {
+    const telefonos = this.getTelefonosReferencia(referenciaIndex);
     if (telefonos.length > 1) {
-      telefonos.removeAt(indiceTelefono);
+      telefonos.removeAt(telefonoIndex);
     }
   }
 
-  agregarCorreoReferencia(indiceReferencia: number): void {
-    const referencia = this.arrayReferenciasFamiliares.at(indiceReferencia) as FormGroup;
-    const correos = referencia.get('correo') as FormArray;
-    correos.push(this.fb.control('', Validators.email));
+  // Para correos de referencias
+  getCorreosReferencia(referenciaIndex: number): FormArray {
+    return this.referencias.at(referenciaIndex).get('correo') as FormArray;
   }
 
-  eliminarCorreoReferencia(indiceReferencia: number, indiceCorreo: number): void {
-    const referencia = this.arrayReferenciasFamiliares.at(indiceReferencia) as FormGroup;
-    const correos = referencia.get('correo') as FormArray;
+  agregarCorreoReferencia(referenciaIndex: number): void {
+    const correos = this.getCorreosReferencia(referenciaIndex);
+    correos.push(this.fb.control('', [Validators.required, Validators.email]));
+  }
+
+  eliminarCorreoReferencia(referenciaIndex: number, correoIndex: number): void {
+    const correos = this.getCorreosReferencia(referenciaIndex);
     if (correos.length > 1) {
-      correos.removeAt(indiceCorreo);
+      correos.removeAt(correoIndex);
     }
-  }
-
-  getTelefonosReferencia(indiceReferencia: number): FormArray {
-    const referencia = this.arrayReferenciasFamiliares.at(indiceReferencia) as FormGroup;
-    return referencia.get('telefono') as FormArray;
-  }
-
-  getCorreosReferencia(indiceReferencia: number): FormArray {
-    const referencia = this.arrayReferenciasFamiliares.at(indiceReferencia) as FormGroup;
-    return referencia.get('correo') as FormArray;
-  }
-
-  formatearFecha(fecha: string): string {
-    if (!fecha) return '';
-    const d = new Date(fecha);
-    return d.toISOString().split('T')[0];
   }
 
   onSubmit(): void {
-    if (this.empleadoForm.invalid) {
-      console.warn('Por favor complete todos los campos requeridos');
-      this.marcarFormularioComoTocado(this.empleadoForm);
+    if (this.editarForm.invalid) {
+      this.marcarControlesComoSucios();
+      this.errorMessage = 'Por favor corrija los errores en el formulario.';
       return;
     }
 
-    this.cargando = true;
-    const datosActualizados = this.empleadoForm.value;
+    // Preparar los datos para enviar
+    const formValue = this.editarForm.getRawValue();
     
-    this.empleadoService.actualizarEmpleado(this.claveEmpleado, datosActualizados).subscribe({
-      next: (respuesta) => {
-        console.log('Datos actualizados correctamente');
-        this.mensajeExito = 'Datos actualizados correctamente';
-        this.cargando = false;
-        setTimeout(() => {
-          this.router.navigate(['/empleados']);
-        }, 1500);
-      },
-      error: (error) => {
-        this.mensajeError = 'Error al actualizar los datos del empleado';
-        console.error('Error al actualizar empleado', error);
-        this.cargando = false;
+    // Mantener los valores originales para los campos que no se pueden modificar
+    const datosActualizados = {
+      ...formValue,
+      claveEmpleado: this.datosOriginales.claveEmpleado,
+      nombreEmpleado: this.datosOriginales.nombreEmpleado,
+      apellidoP: this.datosOriginales.apellidoP,
+      apellidoM: this.datosOriginales.apellidoM,
+      fechaAlta: this.datosOriginales.fechaAlta,
+      rfc: this.datosOriginales.rfc,
+      fechaNacimiento: this.datosOriginales.fechaNacimiento
+    };
+    
+    // Si la contraseña está vacía, eliminarla del objeto para no actualizarla
+    if (!datosActualizados.contraseña) {
+      delete datosActualizados.contraseña;
+    }
+
+    this.empleadoService.actualizarEmpleado(this.claveEmpleado, datosActualizados)
+      .pipe(
+        catchError(error => {
+          this.errorMessage = 'Error al actualizar los datos. Por favor intenta nuevamente.';
+          console.error(error);
+          return of(null);
+        })
+      )
+      .subscribe(response => {
+        if (response?.exito) {
+          this.successMessage = 'Datos actualizados correctamente.';
+          this.empleadoService.guardarSesionEmpleado(response.empleado);
+          setTimeout(() => {
+            this.router.navigate(['/perfil']);
+          }, 1500);
+        }
+      });
+  }
+
+  private marcarControlesComoSucios(): void {
+    // Marcar todos los controles como tocados para mostrar mensajes de error
+    Object.keys(this.editarForm.controls).forEach(key => {
+      const control = this.editarForm.get(key);
+      if (control instanceof FormGroup || control instanceof FormArray) {
+        this.marcarGrupoComoSucio(control);
+      } else if (control) {
+        control.markAsDirty();
+        control.markAsTouched();
       }
     });
   }
 
-  marcarFormularioComoTocado(formGroup: FormGroup): void {
-    Object.values(formGroup.controls).forEach(control => {
-      control.markAsTouched();
-      if (control instanceof FormGroup) {
-        this.marcarFormularioComoTocado(control);
-      }
-    });
+  private marcarGrupoComoSucio(grupo: FormGroup | FormArray): void {
+    if (grupo instanceof FormGroup) {
+      Object.keys(grupo.controls).forEach(key => {
+        const control = grupo.get(key);
+        if (control instanceof FormGroup || control instanceof FormArray) {
+          this.marcarGrupoComoSucio(control);
+        } else if (control) {
+          control.markAsDirty();
+          control.markAsTouched();
+        }
+      });
+    } else {
+      grupo.controls.forEach(control => {
+        if (control instanceof FormGroup || control instanceof FormArray) {
+          this.marcarGrupoComoSucio(control);
+        } else {
+          control.markAsDirty();
+          control.markAsTouched();
+        }
+      });
+    }
   }
 
-  volver(): void {
-    this.router.navigate(['/empleados']);
+  get formulario() {
+    return this.editarForm.controls;
   }
 }

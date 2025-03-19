@@ -480,7 +480,7 @@ router.get('/:claveEmpleado', async (req, res) => {
 });
 
 
-// CU10: Editar datos del empleado
+// CU10: Editar datos del empleado 
 router.put('/:claveEmpleado', async (req, res) => {
     try {
         const { claveEmpleado } = req.params;
@@ -502,12 +502,27 @@ router.put('/:claveEmpleado', async (req, res) => {
                 mensaje: `No se encontró empleado con la clave: ${claveEmpleado}`
             });
         }
+
+        // Eliminar campos que no se deben modificar de los datos enviados
+        const camposProtegidos = [
+            'claveEmpleado',
+            'nombreEmpleado',
+            'apellidoP',
+            'apellidoM',
+            'fechaAlta',
+            'rfc',
+            'fechaNacimiento'
+        ];
+
+        const datosPermitidos = { ...datosActualizados };
+        camposProtegidos.forEach(campo => {
+            delete datosPermitidos[campo];
+        });
         
-        // Actualizar los datos del empleado
-        // Nota: { new: true } hace que devuelva el documento actualizado
+        // Actualizar solo los campos permitidos
         const empleadoActualizado = await Empleado.findOneAndUpdate(
             { claveEmpleado },
-            datosActualizados,
+            datosPermitidos,
             { new: true, runValidators: true }
         );
         
