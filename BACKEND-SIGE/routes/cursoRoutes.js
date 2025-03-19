@@ -361,7 +361,6 @@ router.delete('/eliminarActividadEmpleado/:id', async (req, res) => {
     }
 });
 
-// CU08: Visualizar cursos con filtros
 router.get('/visualizarCursos', async (req, res) => {
     try {
         const {
@@ -369,7 +368,9 @@ router.get('/visualizarCursos', async (req, res) => {
             fechaTermino,
             tipoDocumento,
             especialidad,
-            claveEmpleado
+            claveEmpleado,
+            page = 1, // Página actual (por defecto 1)
+            pageSize = 10 // Tamaño de la página (por defecto 10)
         } = req.query;
 
         // Construir el filtro
@@ -394,9 +395,20 @@ router.get('/visualizarCursos', async (req, res) => {
         if (claveEmpleado) {
             filtro.claveEmpleado = claveEmpleado;
         }
-        const cursos = await CursoEmpleado.find(filtro);
+
+        // Calcular el índice de inicio
+        const startIndex = (page - 1) * pageSize;
+
+        // Obtener los cursos paginados
+        const cursos = await CursoEmpleado.find(filtro)
+            .skip(startIndex) // Saltar los registros anteriores
+            .limit(Number(pageSize)); // Limitar la cantidad de registros por página
+
+        // Obtener el total de cursos (para calcular el total de páginas)
+        const totalCursos = await CursoEmpleado.countDocuments(filtro);
+
         res.json({
-            total: cursos.length,
+            total: totalCursos, // Total de cursos (para la paginación en el frontend)
             cursos
         });
     } catch (error) {

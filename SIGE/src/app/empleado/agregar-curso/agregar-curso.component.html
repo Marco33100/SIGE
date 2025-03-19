@@ -1,1 +1,163 @@
-<p>agregar-curso works!</p>
+<div class="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
+    <div class="bg-white rounded-xl shadow-xl overflow-hidden">
+        <!-- Encabezado del formulario -->
+        <div class="bg-gradient-to-r from-blue-600 to-pink-700 px-8 py-6">
+            <h2 class="text-2xl font-bold text-white">Agregar Curso</h2>
+            <p class="mt-2 text-blue-100">Complete la información para registrar un nuevo curso</p>
+        </div>
+
+        <!-- Formulario -->
+        <form (ngSubmit)="onSubmit()" class="px-8 py-6 space-y-6" novalidate>
+            <!-- Nombre Curso (Campo de texto en lugar de select) -->
+            <div>
+                <label for="nomCurso" class="block text-sm font-semibold text-gray-700 mb-2">
+                    Nombre Curso <span class="text-red-500">*</span>
+                </label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                        </svg>
+                    </div>
+                    <input id="nomCurso" [(ngModel)]="curso.nomCurso" name="nomCurso" required
+                        class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                        placeholder="Ingrese el nombre del curso">
+                </div>
+                <p *ngIf="submitted && !curso.nomCurso" class="mt-1 text-sm text-red-500">
+                    Por favor, ingresa el nombre del curso.
+                </p>
+            </div>
+
+            <!-- Fecha Inicio -->
+            <div>
+                <label for="fechaInicio" class="block text-sm font-semibold text-gray-700 mb-2">
+                    Fecha Inicio <span class="text-red-500">*</span>
+                </label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                    </div>
+                    <input type="date" id="fechaInicio" [(ngModel)]="curso.fechaInicio" name="fechaInicio" required
+                        class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+                </div>
+                <p *ngIf="submitted && !curso.fechaInicio" class="mt-1 text-sm text-red-500">
+                    Por favor, selecciona una fecha de inicio.
+                </p>
+            </div>
+
+            <!-- Fecha Término -->
+            <div>
+                <label for="fechaTermino" class="block text-sm font-semibold text-gray-700 mb-2">
+                    Fecha Término <span class="text-red-500">*</span>
+                </label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                    </div>
+                    <input type="date" id="fechaTermino" [(ngModel)]="curso.fechaTermino" name="fechaTermino" required
+                        class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+                </div>
+                <p *ngIf="submitted && !curso.fechaTermino" class="mt-1 text-sm text-red-500">
+                    Por favor, selecciona una fecha de término.
+                </p>
+            </div>
+
+            <!-- Tipo de Documento -->
+            <div>
+                <label for="tipoDocumento" class="block text-sm font-semibold text-gray-700 mb-2">
+                    Tipo de Documento <span class="text-red-500">*</span>
+                </label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                    </div>
+                    <select id="tipoDocumento" [(ngModel)]="curso.tipoDocumento" name="tipoDocumento" required
+                        class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-white appearance-none">
+                        <option value="" disabled selected>Seleccione un tipo de documento</option>
+                        <option *ngFor="let documento of documentosList" [value]="documento.nomDocumento">
+                            {{ documento.nomDocumento }}
+                        </option>
+                    </select>
+                    <div class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                        <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </div>
+                </div>
+                <p *ngIf="submitted && !curso.tipoDocumento" class="mt-1 text-sm text-red-500">
+                    Por favor, selecciona un tipo de documento.
+                </p>
+            </div>
+
+            <!-- Especialidad -->
+            <div>
+                <label for="especialidad" class="block text-sm font-semibold text-gray-700 mb-2">
+                    Especialidad <span class="text-red-500">*</span>
+                </label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                        </svg>
+                    </div>
+                    <select id="especialidad" [(ngModel)]="curso.especialidad" name="especialidad" required
+                        class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-white appearance-none">
+                        <option value="" disabled selected>Seleccione una especialidad</option>
+                        <option *ngFor="let especialidad of especialidadesList" [value]="especialidad.nomEspecialidad">
+                            {{ especialidad.nomEspecialidad }}
+                        </option>
+                    </select>
+                    <div class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                        <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </div>
+                </div>
+                <p *ngIf="submitted && !curso.especialidad" class="mt-1 text-sm text-red-500">
+                    Por favor, selecciona una especialidad.
+                </p>
+            </div>
+
+            <!-- Descripción -->
+            <div>
+                <label for="descripcionCurso" class="block text-sm font-semibold text-gray-700 mb-2">
+                    Descripción <span class="text-red-500">*</span>
+                </label>
+                <div class="relative">
+                    <div class="absolute top-3 left-3 pointer-events-none">
+                        <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </div>
+                    <textarea id="descripcionCurso" [(ngModel)]="curso.descripcionCurso" name="descripcionCurso"
+                        rows="4" required
+                        class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                        placeholder="Describa los detalles del curso..."></textarea>
+                </div>
+                <p *ngIf="submitted && !curso.descripcionCurso" class="mt-1 text-sm text-red-500">
+                    Por favor, ingresa una descripción.
+                </p>
+            </div>
+
+            <!-- Botón de guardar -->
+            <div class="pt-6 flex justify-center">
+                <button type="submit"
+                    class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors font-semibold text-sm">
+                    Guardar Curso
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

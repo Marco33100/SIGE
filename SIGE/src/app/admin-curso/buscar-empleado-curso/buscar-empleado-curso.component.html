@@ -2,11 +2,11 @@
     <!-- Título Principal -->
     <h2 class="text-3xl font-semibold tracking-tight text-slate-800">
         Gestión de Cursos <span class="border-b-4 border-amber-400">y Actividades de Empleados</span>
-      </h2>
+    </h2>
 
     <!-- Formulario de Búsqueda -->
     <div class="bg-white shadow-lg rounded-lg p-6 mb-6">
-        <form [formGroup]="formularioBusqueda" (ngSubmit)="buscarEmpleado()">
+        <form [formGroup]="formularioBusqueda">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <!-- Campo de Clave del Empleado -->
                 <div class="col-span-2">
@@ -17,10 +17,22 @@
                         formControlName="terminoBusqueda"
                         class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                         placeholder="Ingrese clave del empleado"
+                        (input)="onInputChange($event)"
                     />
                     <div *ngIf="formularioBusqueda.get('terminoBusqueda')?.invalid && formularioBusqueda.get('terminoBusqueda')?.touched"
                         class="text-red-500 text-sm mt-1">
                         Campo obligatorio
+                    </div>
+
+                    <!-- Lista de resultados de búsqueda progresiva -->
+                    <div *ngIf="resultadosBusqueda.length > 0" class="mt-2 bg-white border border-gray-300 rounded-lg shadow-lg">
+                        <ul>
+                            <li *ngFor="let empleado of resultadosBusqueda"
+                                (click)="seleccionarEmpleado(empleado)"
+                                class="p-2 hover:bg-gray-100 cursor-pointer">
+                                {{ empleado.claveEmpleado }} - {{ empleado.nombreCompleto }}
+                            </li>
+                        </ul>
                     </div>
                 </div>
 
@@ -55,9 +67,10 @@
             <!-- Botones de Acción -->
             <div class="mt-6 flex gap-4">
                 <button
-                    type="submit"
+                    type="button"
                     class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center"
                     [disabled]="formularioBusqueda.invalid || cargando"
+                    (click)="seleccionarEmpleado(empleadoSeleccionado)"
                 >
                     <span *ngIf="cargando" class="flex items-center">
                         <svg class="animate-spin h-5 w-5 mr-2 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -78,6 +91,7 @@
             </div>
         </form>
     </div>
+
 
     <!-- Empleado Seleccionado -->
     <div *ngIf="empleadoSeleccionado" class="bg-white shadow-lg rounded-lg p-6 mb-6">

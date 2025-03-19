@@ -1,15 +1,14 @@
 <div class="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
-
     <div class="bg-white rounded-xl shadow-xl overflow-hidden">
         <!-- Encabezado del formulario -->
         <div class="bg-gradient-to-r from-blue-600 to-pink-700 px-8 py-6">
             <h2 class="text-2xl font-bold text-white">Agregar Curso</h2>
-            <p class="mt-2 text-blue-100">Complete  la información para registrar un nuevo curso</p>
+            <p class="mt-2 text-blue-100">Complete la información para registrar un nuevo curso</p>
         </div>
 
         <!-- Formulario -->
         <form (ngSubmit)="onSubmit()" class="px-8 py-6 space-y-6" novalidate>
-            <!-- Clave Empleado -->
+            <!-- Clave Empleado con Búsqueda Progresiva -->
             <div>
                 <label for="claveEmpleado" class="block text-sm font-semibold text-gray-700 mb-2">
                     Clave Empleado <span class="text-red-500">*</span>
@@ -23,13 +22,24 @@
                     </div>
                     <input id="claveEmpleado" [(ngModel)]="curso.claveEmpleado" name="claveEmpleado" required
                         class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                        placeholder="Ingrese la clave del empleado">
+                        placeholder="Ingrese la clave del empleado" (input)="onInputChange($event)">
+                </div>
+                <!-- Lista de resultados de búsqueda -->
+                <div *ngIf="resultadosBusqueda.length > 0" class="mt-2 bg-white border border-gray-300 rounded-lg shadow-lg">
+                    <ul>
+                        <li *ngFor="let empleado of resultadosBusqueda" 
+                            (click)="seleccionarEmpleado(empleado)"
+                            class="px-4 py-2 hover:bg-gray-100 cursor-pointer">
+                            {{ empleado.nombre }} - {{ empleado.claveEmpleado }}
+                        </li>
+                    </ul>
                 </div>
                 <p *ngIf="submitted && !curso.claveEmpleado" class="mt-1 text-sm text-red-500">
                     Por favor, ingresa la clave del empleado.
                 </p>
             </div>
 
+            <!-- Resto del formulario... -->
             <!-- Nombre Curso -->
             <div>
                 <label for="nomCurso" class="block text-sm font-semibold text-gray-700 mb-2">

@@ -2,7 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { ActividadService } from '../../../services/actividad.service';
-import Swal from 'sweetalert2'; // Importa SweetAlert2
+import { EmpleadoService } from '../../../services/empleados.service'; // Importar el servicio de empleados
+import Swal from 'sweetalert2';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { Subject } from 'rxjs';
 
 @Component({
   selector: 'app-agregar-actividades',
@@ -21,12 +24,32 @@ export class AgregarActividadesComponent implements OnInit {
 
   estatusList: any[] = [];
   actividadesList: any[] = [];
+  submitted = false;
 
-  constructor(private actividadService: ActividadService) { }
+  // Variables para la búsqueda progresiva
+  resultadosBusqueda: any[] = [];
+  busquedaSubject = new Subject<string>();
+
+  constructor(
+    private actividadService: ActividadService,
+    private empleadoService: EmpleadoService // Inyectar el servicio de empleados
+  ) { }
 
   ngOnInit(): void {
     this.cargarEstatus();
     this.cargarActividades();
+
+    // Configurar la búsqueda progresiva
+    this.busquedaSubject.pipe(
+      debounceTime(300), // Esperar 300ms después de cada tecla
+      distinctUntilChanged() // Evitar búsquedas duplicadas
+    ).subscribe(termino => {
+      if (termino) {
+        this.buscarEmpleadosProgresivo(termino);
+      } else {
+        this.resultadosBusqueda = [];
+      }
+    });
   }
 
   cargarEstatus(): void {
@@ -41,11 +64,9 @@ export class AgregarActividadesComponent implements OnInit {
     });
   }
 
-  submitted = false; // Variable para controlar la validación
-
   onSubmit(): void {
-    this.submitted = true; // Activa la validación
-  
+    this.submitted = true;
+
     // Verifica si todos los campos están llenos
     if (!this.actividad.claveEmpleado || 
         !this.actividad.nomActividad || 
@@ -59,43 +80,43 @@ export class AgregarActividadesComponent implements OnInit {
       });
       return;
     }
-      this.actividadService.agregarActividad(this.actividad).subscribe({
+
+    this.actividadService.agregarActividad(this.actividad).subscribe({
       next: (response) => {
         console.log('Actividad agregada', response);
-        this.mostrarMensajeExito(); // Muestra mensaje de éxito
-        this.limpiarFormulario(); // Limpia el formulario
-        this.submitted = false; // Restablece la validación
+        this.mostrarMensajeExito();
+        this.limpiarFormulario();
+        this.submitted = false;
       },
       error: (err) => {
         console.error('Error al agregar actividad', err);
-        this.mostrarMensajeError(); // Muestra mensaje de error
+        this.mostrarMensajeError();
       }
     });
   }
-  
 
   mostrarMensajeExito(): void {
     Swal.fire({
-      icon: 'success', // Ícono de éxito
+      icon: 'success',
       title: '¡Datos guardados!',
       text: 'La actividad se ha guardado correctamente.',
       confirmButtonText: 'Aceptar',
       customClass: {
-        popup: 'sweetalert-custom', // Clase personalizada para el popup
-        confirmButton: 'btn btn-success' // Estilo personalizado para el botón
+        popup: 'sweetalert-custom',
+        confirmButton: 'btn btn-success'
       }
     });
   }
 
   mostrarMensajeError(): void {
     Swal.fire({
-      icon: 'error', // Ícono de error
+      icon: 'error',
       title: 'Error',
       text: 'Hubo un problema al guardar la actividad. Inténtalo de nuevo.',
       confirmButtonText: 'Aceptar',
       customClass: {
-        popup: 'sweetalert-custom', // Clase personalizada para el popup
-        confirmButton: 'btn btn-danger' // Estilo personalizado para el botón
+        popup: 'sweetalert-custom',
+        confirmButton: 'btn btn-danger'
       }
     });
   }
@@ -109,8 +130,37 @@ export class AgregarActividadesComponent implements OnInit {
     };
   }
 
-    // Función para mapear el estatus
-    mapearEstatus(estatus: number): string {
-      return estatus === 1 ? 'Participó' : 'No participó';
-    }
+  // Método para manejar cambios en el campo de búsqueda
+  onInputChange(event: Event): void {
+    const terminoBusqueda = (event.target as HTMLInputElement).value;
+    this.busquedaSubject.next(terminoBusqueda);
+  }
+
+  // Método para buscar empleados de manera progresiva
+  buscarEmpleadosProgresivo(termino: string): void {
+    this.empleadoService.buscarEmpleados(termino).subscribe({
+      next: (respuesta) => {
+        if (respuesta.exito) {
+          this.resultadosBusqueda = respuesta.empleados;
+        } else {
+          this.resultadosBusqueda = [];
+        }
+      },
+      error: (error) => {
+        console.error('Error al buscar empleados:', error);
+        this.resultadosBusqueda = [];
+      }
+    });
+  }
+
+  // Método para seleccionar un empleado de la lista
+  seleccionarEmpleado(empleado: any): void {
+    this.actividad.claveEmpleado = empleado.claveEmpleado;
+    this.resultadosBusqueda = []; // Limpiar la lista de resultados
+  }
+
+  // Función para mapear el estatus
+  mapearEstatus(estatus: number): string {
+    return estatus === 1 ? 'Participó' : 'No participó';
+  }
 }

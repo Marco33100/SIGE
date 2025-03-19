@@ -8,7 +8,7 @@
 
         <!-- Formulario -->
         <form (ngSubmit)="onSubmit()" class="px-8 py-6 space-y-6" novalidate>
-            <!-- Clave Empleado -->
+            <!-- Clave Empleado con Búsqueda Progresiva -->
             <div>
                 <label for="claveEmpleado" class="block text-sm font-semibold text-gray-700 mb-2">
                     Clave Empleado <span class="text-red-500">*</span>
@@ -22,9 +22,21 @@
                     </div>
                     <input id="claveEmpleado" [(ngModel)]="actividad.claveEmpleado" name="claveEmpleado" required
                         class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                        placeholder="Ingrese la clave del empleado">
+                        placeholder="Ingrese la clave del empleado" (input)="onInputChange($event)">
                 </div>
-                <p class="mt-1 text-sm text-red-500 hidden">Por favor, ingresa la clave del empleado.</p>
+                <!-- Lista de resultados de búsqueda -->
+                <div *ngIf="resultadosBusqueda.length > 0" class="mt-2 bg-white border border-gray-300 rounded-lg shadow-lg">
+                    <ul>
+                        <li *ngFor="let empleado of resultadosBusqueda" 
+                            (click)="seleccionarEmpleado(empleado)"
+                            class="px-4 py-2 hover:bg-gray-100 cursor-pointer">
+                            {{ empleado.nombre }} - {{ empleado.claveEmpleado }}
+                        </li>
+                    </ul>
+                </div>
+                <p *ngIf="submitted && !actividad.claveEmpleado" class="mt-1 text-sm text-red-500">
+                    Por favor, ingresa la clave del empleado.
+                </p>
             </div>
 
             <!-- Nombre Actividad -->
@@ -52,7 +64,9 @@
                         </svg>
                     </div>
                 </div>
-                <p class="mt-1 text-sm text-red-500 hidden">Por favor, selecciona una actividad.</p>
+                <p *ngIf="submitted && !actividad.nomActividad" class="mt-1 text-sm text-red-500">
+                    Por favor, selecciona una actividad.
+                </p>
             </div>
 
             <!-- Descripción -->
@@ -71,7 +85,7 @@
                         class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                         placeholder="Describa los detalles de la actividad..."></textarea>
                 </div>
-                <p class="mt-1 text-sm text-red-500 hidden" id="errorDescripcion">
+                <p *ngIf="submitted && !actividad.descripcionAct" class="mt-1 text-sm text-red-500">
                     Por favor, ingresa una descripción.
                 </p>
             </div>
@@ -101,10 +115,12 @@
                         </svg>
                     </div>
                 </div>
-                <p class="mt-1 text-sm text-red-500 hidden">Por favor, selecciona un estatus.</p>
+                <p *ngIf="submitted && !actividad.estatusActividad" class="mt-1 text-sm text-red-500">
+                    Por favor, selecciona un estatus.
+                </p>
             </div>
 
-            <!-- Boton de guardar -->
+            <!-- Botón de guardar -->
             <div class="pt-6 flex justify-center">
                 <button type="submit"
                     class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors font-semibold text-sm">
