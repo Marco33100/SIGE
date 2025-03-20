@@ -337,6 +337,7 @@ router.get('/listar', async (req, res) => {
             apellidoM,
             fechaNacimiento,
             fechaAlta,
+            fotoEmpleado,
             rol
         } = req.query;
         
@@ -396,6 +397,7 @@ router.get('/listar', async (req, res) => {
             fechaAlta: emp.fechaAlta,
             correoElectronico: emp.correoElectronico[0] || '',
             telefono: emp.telefono[0] || '',
+            fotoEmpleado: emp.fotoEmpleado,
             rol: emp.rol,
             activo: emp.activo
         }));
