@@ -47,6 +47,7 @@ export class HomeComponent implements OnInit {
           { label: 'Registrar empleado', icon: 'app_registration', url: '/home/registrar-empleado' },
           { label: 'Listar empleado', icon: 'list', url: '/home/listar-empleado' },
           { label: 'Mis datos personales', icon: 'app_registration', url: '/home/visualizar-datos' },
+          { label: 'Editar datos', icon: 'edit', url: '/home/editar-datos' },
           { label: 'Cerrar Sesión', icon: 'exit_to_app', url: '/login' },
 
         ];
@@ -59,6 +60,7 @@ export class HomeComponent implements OnInit {
           {label: 'Visualizar Actividades', icon: 'visibility', url: '/home/visualizar-actividad'},
           {label: 'Visualizar Cursos', icon:'visibility', url: '/home/visualizar-curso'},
           { label: 'Mis datos personales', icon: 'app_registration', url: '/home/visualizar-datos' },
+          { label: 'Editar datos', icon: 'edit', url: '/home/editar-datos' },
           { label: 'Cerrar Sesión', icon: 'exit_to_app', url: '/login' },
         ];
       case 3: // Empleado

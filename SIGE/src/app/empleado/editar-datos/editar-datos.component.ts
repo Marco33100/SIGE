@@ -1,61 +1,161 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { EmpleadoService } from '../../../services/empleados.service';
-import { AuthService } from '../../../services/auth.service';
-import { Observable, catchError, of } from 'rxjs';
+import { CatalogosService } from '../../../services/catalogos.service';
+import { Observable, catchError, forkJoin, of } from 'rxjs';
 import { FormArray, FormControl } from '@angular/forms';
 
 @Component({
   selector: 'app-editar-datos',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule],
   templateUrl: './editar-datos.component.html',
   styleUrls: ['./editar-datos.component.css']
 })
 export class EditarDatosComponent implements OnInit {
-  editarForm!: FormGroup;
-  claveEmpleado!: string;
+  editarForm: FormGroup;
+  claveEmpleado: string = '';
   errorMessage: string = '';
   successMessage: string = '';
-  sexoOpciones = ['Masculino', 'Femenino', 'Otro'];
-  rolOpciones = [
-    { valor: 1, nombre: 'Administrador' },
-    { valor: 2, nombre: 'Supervisor' },
-    { valor: 3, nombre: 'Empleado normal' }
-  ];
-  datosOriginales: any;
+  
+  // Catálogos
+  sexoOpciones: any[] = [];
+  rolOpciones: any[] = [];
+  ciudadOpciones: any[] = [];
+  departamentoOpciones: any[] = [];
+  puestoOpciones: any[] = [];
+  parentescoOpciones: any[] = [];
+  
+  datosOriginales: any = {};
+  cargandoDatos: boolean = false;
+  esAdministrador: boolean = false;
 
   constructor(
     private fb: FormBuilder,
     private empleadoService: EmpleadoService,
-    private authService: AuthService,
+    private catalogosService: CatalogosService,
     private router: Router,
     private route: ActivatedRoute
-  ) { }
-
-  ngOnInit(): void {
-    if (!this.empleadoService.estaLogueado()) {
-      this.router.navigate(['/login']);
-      return;
-    }
-
-    // Obtener datos del empleado actual
-    const empleadoData = this.empleadoService.obtenerSesionEmpleado();
-    if (!empleadoData) {
-      this.errorMessage = 'No se pudieron obtener los datos del empleado.';
-      return;
-    }
-    
-    this.claveEmpleado = empleadoData.claveEmpleado;
-    this.datosOriginales = { ...empleadoData };
-
-    // Inicializar el formulario con los datos actuales
-    this.inicializarFormulario(empleadoData);
+  ) { 
+    this.editarForm = this.inicializarFormularioVacio();
   }
 
-  private inicializarFormulario(datosIniciales: any): void {
+  ngOnInit(): void {
+    try {
+      // Obtener la clave del empleado desde el servicio de sesión
+      const empleadoSesion = this.empleadoService.obtenerSesionEmpleado();
+      
+      if (empleadoSesion && empleadoSesion.claveEmpleado) {
+        this.claveEmpleado = empleadoSesion.claveEmpleado;
+        this.esAdministrador = empleadoSesion.rol === 1;
+        this.cargarCatalogos();
+      } else {
+        this.errorMessage = 'No se encontró ID de empleado en la sesión';
+      }
+    } catch (error) {
+      this.errorMessage = 'Error al obtener datos de sesión';
+      console.error(error);
+    }
+  }
+
+  private cargarCatalogos(): void {
+    this.cargandoDatos = true;
+    
+    // Cargar todos los catálogos en paralelo
+    forkJoin({
+      sexos: this.catalogosService.getSexos(),
+      roles: this.catalogosService.getRoles(),
+      ciudades: this.catalogosService.getCiudades(),
+      departamentos: this.catalogosService.getDepartamentos(),
+      puestos: this.catalogosService.getPuestos(),
+      parentescos: this.catalogosService.getParentescos()
+    }).subscribe({
+      next: (catalogs) => {
+        this.sexoOpciones = catalogs.sexos;
+        this.rolOpciones = catalogs.roles;
+        this.ciudadOpciones = catalogs.ciudades;
+        this.departamentoOpciones = catalogs.departamentos;
+        this.puestoOpciones = catalogs.puestos;
+        this.parentescoOpciones = catalogs.parentescos;
+        
+        // Una vez cargados los catálogos, cargar los datos del empleado
+        this.cargarDatosEmpleado();
+      },
+      error: (error) => {
+        this.cargandoDatos = false;
+        this.errorMessage = 'Error al cargar los catálogos necesarios.';
+        console.error('Error cargando catálogos:', error);
+      }
+    });
+  }
+
+  // Crear un formulario vacío para evitar errores de undefined
+  private inicializarFormularioVacio(): FormGroup {
+    return this.fb.group({
+      // Campos que no se pueden modificar (disabled)
+      claveEmpleado: [{ value: '', disabled: true }],
+      nombreEmpleado: [{ value: '', disabled: true }],
+      apellidoP: [{ value: '', disabled: true }],
+      apellidoM: [{ value: '', disabled: true }],
+      fechaAlta: [{ value: '', disabled: true }],
+      rfc: [{ value: '', disabled: true }],
+      fechaNacimiento: [{ value: '', disabled: true }],
+      
+      // Campos que sí se pueden modificar
+      contraseña: ['', [Validators.minLength(8)]], // opcional
+      sexo: ['', Validators.required],
+      fotoEmpleado: [''],
+      domicilio: this.fb.group({
+        calle: ['', Validators.required],
+        numInterior: [''],
+        numExterior: ['', Validators.required],
+        colonia: ['', Validators.required],
+        codigoPostal: ['', [Validators.required, Validators.pattern(/^\d{5}$/)]],
+        ciudad: ['', Validators.required]
+      }),
+      departamento: [{ value: '', disabled: !this.esAdministrador }, Validators.required],
+      puesto: [{ value: '', disabled: !this.esAdministrador }, Validators.required],
+      telefono: this.fb.array([
+        this.fb.control('', [Validators.required, Validators.pattern(/^[0-9]{10}$/)])
+      ]),
+      correoElectronico: this.fb.array([
+        this.fb.control('', [Validators.required, Validators.email])
+      ]),
+      referenciasFamiliares: this.fb.array([
+        this.crearReferenciaGrupo({})
+      ]),
+      rol: [{ value: 3, disabled: !this.esAdministrador }, Validators.required],
+      activo: [true]
+    });
+  }
+
+  private cargarDatosEmpleado(): void {
+    if (!this.claveEmpleado) {
+      this.errorMessage = 'ID de empleado no encontrado';
+      return;
+    }
+
+    this.empleadoService.obtenerEmpleado(this.claveEmpleado).subscribe({
+      next: (response) => {
+        this.cargandoDatos = false;
+        if (response.exito) {
+          this.datosOriginales = response.empleado;
+          this.inicializarFormulario(response.empleado);
+        } else {
+          this.errorMessage = 'No se pudieron obtener los datos del empleado.';
+        }
+      },
+      error: (error) => {
+        this.cargandoDatos = false;
+        this.errorMessage = 'Error al cargar los datos del empleado.';
+        console.error(error);
+      }
+    });
+  }
+
+  private inicializarFormulario(datosIniciales: any = {}): void {
     this.editarForm = this.fb.group({
       // Campos que no se pueden modificar (disabled)
       claveEmpleado: [{ value: datosIniciales.claveEmpleado || '', disabled: true }],
@@ -66,6 +166,12 @@ export class EditarDatosComponent implements OnInit {
       rfc: [{ value: datosIniciales.rfc || '', disabled: true }],
       fechaNacimiento: [{ value: this.formatDate(datosIniciales.fechaNacimiento) || '', disabled: true }],
       
+      // Información laboral - ahora todo disabled
+      departamento: [{ value: datosIniciales.departamento || '', disabled: true }],
+      puesto: [{ value: datosIniciales.puesto || '', disabled: true }],
+      rol: [{ value: datosIniciales.rol || 3, disabled: true }],
+      activo: [{ value: datosIniciales.activo !== undefined ? datosIniciales.activo : true, disabled: true }],
+            
       // Campos que sí se pueden modificar
       contraseña: ['', [Validators.minLength(8)]], // opcional
       sexo: [datosIniciales.sexo || '', Validators.required],
@@ -78,8 +184,6 @@ export class EditarDatosComponent implements OnInit {
         codigoPostal: [datosIniciales.domicilio?.codigoPostal || '', [Validators.required, Validators.pattern(/^\d{5}$/)]],
         ciudad: [datosIniciales.domicilio?.ciudad || '', Validators.required]
       }),
-      departamento: [datosIniciales.departamento || '', Validators.required],
-      puesto: [datosIniciales.puesto || '', Validators.required],
       telefono: this.fb.array(
         this.crearArregloControles(datosIniciales.telefono || [''], [Validators.required, Validators.pattern(/^[0-9]{10}$/)])
       ),
@@ -89,9 +193,7 @@ export class EditarDatosComponent implements OnInit {
       referenciasFamiliares: this.fb.array(
         (datosIniciales.referenciasFamiliares?.length ? datosIniciales.referenciasFamiliares : [{}])
           .map((ref: any) => this.crearReferenciaGrupo(ref))
-      ),
-      rol: [datosIniciales.rol || 3, Validators.required],
-      activo: [datosIniciales.activo !== undefined ? datosIniciales.activo : true]
+      )
     });
   }
 
@@ -102,7 +204,7 @@ export class EditarDatosComponent implements OnInit {
     return valores.map(valor => this.fb.control(valor, validadores));
   }
 
-  private crearReferenciaGrupo(ref: any): FormGroup {
+  private crearReferenciaGrupo(ref: any = {}): FormGroup {
     return this.fb.group({
       nomCompleto: [ref.nomCompleto || '', Validators.required],
       parentesco: [ref.parentesco || '', Validators.required],
@@ -124,11 +226,20 @@ export class EditarDatosComponent implements OnInit {
     return `${year}-${month}-${day}`;
   }
 
-  // Para teléfonos
+  // Getters para FormArrays
   get telefonos(): FormArray {
     return this.editarForm.get('telefono') as FormArray;
   }
 
+  get correosElectronicos(): FormArray {
+    return this.editarForm.get('correoElectronico') as FormArray;
+  }
+
+  get referencias(): FormArray {
+    return this.editarForm.get('referenciasFamiliares') as FormArray;
+  }
+
+  // Métodos para agregar/eliminar teléfonos
   agregarTelefono(): void {
     this.telefonos.push(this.fb.control('', [Validators.required, Validators.pattern(/^[0-9]{10}$/)]));
   }
@@ -139,11 +250,7 @@ export class EditarDatosComponent implements OnInit {
     }
   }
 
-  // Para correos electrónicos
-  get correosElectronicos(): FormArray {
-    return this.editarForm.get('correoElectronico') as FormArray;
-  }
-
+  // Métodos para agregar/eliminar correos
   agregarCorreo(): void {
     this.correosElectronicos.push(this.fb.control('', [Validators.required, Validators.email]));
   }
@@ -154,11 +261,7 @@ export class EditarDatosComponent implements OnInit {
     }
   }
 
-  // Para referencias familiares
-  get referencias(): FormArray {
-    return this.editarForm.get('referenciasFamiliares') as FormArray;
-  }
-
+  // Métodos para referencias familiares
   agregarReferencia(): void {
     this.referencias.push(this.crearReferenciaGrupo({}));
   }
@@ -169,8 +272,11 @@ export class EditarDatosComponent implements OnInit {
     }
   }
 
-  // Para teléfonos de referencias
+  // Métodos para teléfonos de referencias
   getTelefonosReferencia(referenciaIndex: number): FormArray {
+    if (!this.referencias || !this.referencias.at(referenciaIndex)) {
+      return this.fb.array([]);
+    }
     return this.referencias.at(referenciaIndex).get('telefono') as FormArray;
   }
 
@@ -186,8 +292,11 @@ export class EditarDatosComponent implements OnInit {
     }
   }
 
-  // Para correos de referencias
+  // Métodos para correos de referencias
   getCorreosReferencia(referenciaIndex: number): FormArray {
+    if (!this.referencias || !this.referencias.at(referenciaIndex)) {
+      return this.fb.array([]);
+    }
     return this.referencias.at(referenciaIndex).get('correo') as FormArray;
   }
 
@@ -204,13 +313,17 @@ export class EditarDatosComponent implements OnInit {
   }
 
   onSubmit(): void {
+    if (!this.editarForm) {
+      this.errorMessage = 'El formulario no está listo. Por favor, inténtelo de nuevo.';
+      return;
+    }
+
     if (this.editarForm.invalid) {
       this.marcarControlesComoSucios();
       this.errorMessage = 'Por favor corrija los errores en el formulario.';
       return;
     }
 
-    // Preparar los datos para enviar
     const formValue = this.editarForm.getRawValue();
     
     // Mantener los valores originales para los campos que no se pueden modificar
@@ -225,7 +338,13 @@ export class EditarDatosComponent implements OnInit {
       fechaNacimiento: this.datosOriginales.fechaNacimiento
     };
     
-    // Si la contraseña está vacía, eliminarla del objeto para no actualizarla
+    // Si no es administrador, mantener los valores originales de los campos restringidos
+    if (!this.esAdministrador) {
+      datosActualizados.departamento = this.datosOriginales.departamento;
+      datosActualizados.puesto = this.datosOriginales.puesto;
+      datosActualizados.rol = this.datosOriginales.rol;
+    }
+    
     if (!datosActualizados.contraseña) {
       delete datosActualizados.contraseña;
     }
@@ -239,18 +358,20 @@ export class EditarDatosComponent implements OnInit {
         })
       )
       .subscribe(response => {
+        console.log('Respuesta de actualización:', response); // Agrega esta línea
         if (response?.exito) {
           this.successMessage = 'Datos actualizados correctamente.';
-          this.empleadoService.guardarSesionEmpleado(response.empleado);
-          setTimeout(() => {
-            this.router.navigate(['/perfil']);
-          }, 1500);
+          this.cargandoDatos = false; // Agrega un estado de carga
+        } else {
+          // Agrega esto para manejar respuestas no erróneas pero no exitosas
+          this.errorMessage = response?.mensaje || 'No se pudo actualizar los datos.';
         }
       });
   }
 
   private marcarControlesComoSucios(): void {
-    // Marcar todos los controles como tocados para mostrar mensajes de error
+    if (!this.editarForm) return;
+    
     Object.keys(this.editarForm.controls).forEach(key => {
       const control = this.editarForm.get(key);
       if (control instanceof FormGroup || control instanceof FormArray) {
@@ -286,6 +407,7 @@ export class EditarDatosComponent implements OnInit {
   }
 
   get formulario() {
-    return this.editarForm.controls;
+    return this.editarForm ? this.editarForm.controls : {};
   }
+  
 }
