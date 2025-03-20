@@ -3,6 +3,7 @@ import { EmpleadoService } from '../../../services/empleados.service';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-buscar-empleado',
@@ -29,7 +30,7 @@ export class BuscarEmpleadoComponent implements OnInit {
   // Subject para controlar el debounce de la búsqueda
   private busquedaSubject = new Subject<string>();
 
-  constructor(private empleadoService: EmpleadoService) { }
+  constructor(private empleadoService: EmpleadoService,  private router: Router) { }
 
   ngOnInit(): void {
     this.busquedaSubject.pipe(
@@ -75,6 +76,10 @@ export class BuscarEmpleadoComponent implements OnInit {
         this.resultados = [];
       }
     });
+  }
+
+  isArray(value: any): boolean {
+    return Array.isArray(value);
   }
 
   seleccionarEmpleado(empleado: any): void {
@@ -157,5 +162,10 @@ export class BuscarEmpleadoComponent implements OnInit {
         this.cerrarDialogos();
       }
     });
+  }
+
+  editarEmpleado(empleado: any): void {
+    // Navega a la ruta de edición con el ID o clave del empleado
+    this.router.navigate(['home', 'admin-editar', empleado.claveEmpleado]);
   }
 }

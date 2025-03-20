@@ -1,0 +1,517 @@
+<div class="container mt-4">
+    <div class="row">
+      <div class="col-12">
+        <div class="card">
+          <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">Editar Empleado</h4>
+          </div>
+          <div class="card-body">
+            <!-- Mensajes de error y éxito -->
+            <div *ngIf="errorMessage" class="alert alert-danger">
+              {{ errorMessage }}
+            </div>
+            <div *ngIf="successMessage" class="alert alert-success">
+              {{ successMessage }}
+            </div>
+            
+            <!-- Indicador de carga -->
+            <div *ngIf="cargandoDatos" class="text-center mb-4">
+              <div class="spinner-border text-primary" role="status">
+                <span class="sr-only">Cargando...</span>
+              </div>
+              <p class="mt-2">Cargando datos del empleado...</p>
+            </div>
+            
+            <!-- Formulario de edición -->
+            <form [formGroup]="editarForm" (ngSubmit)="onSubmit()" *ngIf="!cargandoDatos">
+              
+              <!-- Información básica -->
+              <div class="form-section">
+                <h3>Información Básica</h3>
+                
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label for="claveEmpleado">Clave de Empleado</label>
+                      <input type="text" id="claveEmpleado" class="form-control" formControlName="claveEmpleado" readonly>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label for="fechaAlta">Fecha de Alta</label>
+                      <input type="date" id="fechaAlta" class="form-control" formControlName="fechaAlta" readonly>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="row">
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <label for="nombreEmpleado">Nombre <span class="text-danger">*</span></label>
+                      <input type="text" id="nombreEmpleado" class="form-control" 
+                             [ngClass]="{'is-invalid': formulario['nombreEmpleado'].errors?.['required'] && formulario['nombreEmpleado'].touched}"
+                             formControlName="nombreEmpleado">
+                      <div *ngIf="formulario['nombreEmpleado'].errors?.['required'] && formulario['nombreEmpleado'].touched" 
+                           class="invalid-feedback">
+                        El nombre es requerido
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <label for="apellidoP">Apellido Paterno <span class="text-danger">*</span></label>
+                      <input type="text" id="apellidoP" class="form-control" 
+                             [ngClass]="{'is-invalid': formulario['apellidoP'].errors?.['required'] && formulario['apellidoP'].touched}"
+                             formControlName="apellidoP">
+                      <div *ngIf="formulario['apellidoP'].errors?.['required'] && formulario['apellidoP'].touched" 
+                           class="invalid-feedback">
+                        El apellido paterno es requerido
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <label for="apellidoM">Apellido Materno <span class="text-danger">*</span></label>
+                      <input type="text" id="apellidoM" class="form-control" 
+                             [ngClass]="{'is-invalid': formulario['apellidoM'].errors?.['required'] && formulario['apellidoM'].touched}"
+                             formControlName="apellidoM">
+                      <div *ngIf="formulario['apellidoM'].errors?.['required'] && formulario['apellidoM'].touched" 
+                           class="invalid-feedback">
+                        El apellido materno es requerido
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                          <label for="rfc">RFC</label>
+                          <input type="text" id="rfc" class="form-control" 
+                                 [ngClass]="{'is-invalid': formulario['rfc'].errors?.['pattern'] && formulario['rfc'].touched}"
+                                 formControlName="rfc"
+                                 readonly>  <!-- Campo de solo lectura -->                         
+                        </div>
+                      </div>
+                      
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <label for="fechaNacimiento">Fecha de Nacimiento <span class="text-danger">*</span></label>
+                      <input type="date" id="fechaNacimiento" class="form-control" 
+                             [ngClass]="{'is-invalid': formulario['fechaNacimiento'].errors?.['required'] && formulario['fechaNacimiento'].touched}"
+                             formControlName="fechaNacimiento">
+                      <div *ngIf="formulario['fechaNacimiento'].errors?.['required'] && formulario['fechaNacimiento'].touched" 
+                           class="invalid-feedback">
+                        La fecha de nacimiento es requerida
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <label for="sexo">Sexo <span class="text-danger">*</span></label>
+                      <select id="sexo" class="form-control" 
+                              [ngClass]="{'is-invalid': formulario['sexo'].errors?.['required'] && formulario['sexo'].touched}" 
+                              formControlName="sexo">
+                        <option value="">Seleccione...</option>
+                        <option *ngFor="let sexo of sexoOpciones" [value]="sexo.sexo || sexo">
+                          {{ sexo.sexo || sexo }}
+                        </option>
+                      </select>
+                      <div *ngIf="formulario['sexo'].errors?.['required'] && formulario['sexo'].touched" 
+                           class="invalid-feedback">
+                        El sexo es requerido
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="form-group">
+                  <label for="contraseña">Contraseña (Dejar en blanco para mantener la actual)</label>
+                  <input type="password" id="contraseña" class="form-control" 
+                         [ngClass]="{'is-invalid': formulario['contraseña'].errors?.['minlength'] && formulario['contraseña'].touched}"
+                         formControlName="contraseña">
+                  <div *ngIf="formulario['contraseña'].errors?.['minlength'] && formulario['contraseña'].touched" 
+                       class="invalid-feedback">
+                    La contraseña debe tener al menos 8 caracteres
+                  </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="fotoEmpleado">URL de la Foto del Empleado</label>
+                    <input type="text" id="fotoEmpleado" class="form-control"
+                           placeholder="https://ejemplo.com/imagen.jpg"
+                           formControlName="fotoEmpleado">
+                    <small class="form-text text-muted">Ingrese la URL de la imagen</small>
+                    
+                    <!-- Mostrar vista previa de la imagen -->
+                    <div *ngIf="editarForm.get('fotoEmpleado')?.value">
+                      <img [src]="editarForm.get('fotoEmpleado')?.value" alt="Foto del empleado" 
+                           class="img-thumbnail mt-2" width="150"
+                           onerror="this.src='assets/images/placeholder-user.jpg'">
+                    </div>
+                  </div>
+                  
+              </div>
+              
+              <!-- Información de Domicilio -->
+              <div class="form-section mt-4" formGroupName="domicilio">
+                <h3>Domicilio</h3>
+                
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label for="calle">Calle <span class="text-danger">*</span></label>
+                      <input type="text" id="calle" class="form-control" 
+                             [ngClass]="{'is-invalid': formulario['domicilio'].get('calle')?.errors?.['required'] && formulario['domicilio'].get('calle')?.touched}"
+                             formControlName="calle">
+                      <div *ngIf="formulario['domicilio'].get('calle')?.errors?.['required'] && formulario['domicilio'].get('calle')?.touched" 
+                           class="invalid-feedback">
+                        La calle es requerida
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-3">
+                    <div class="form-group">
+                      <label for="numExterior">Número Exterior <span class="text-danger">*</span></label>
+                      <input type="text" id="numExterior" class="form-control" 
+                             [ngClass]="{'is-invalid': formulario['domicilio'].get('numExterior')?.errors?.['required'] && formulario['domicilio'].get('numExterior')?.touched}"
+                             formControlName="numExterior">
+                      <div *ngIf="formulario['domicilio'].get('numExterior')?.errors?.['required'] && formulario['domicilio'].get('numExterior')?.touched" 
+                           class="invalid-feedback">
+                        El número exterior es requerido
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-3">
+                    <div class="form-group">
+                      <label for="numInterior">Número Interior</label>
+                      <input type="text" id="numInterior" class="form-control" formControlName="numInterior">
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="row">
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <label for="colonia">Colonia <span class="text-danger">*</span></label>
+                      <input type="text" id="colonia" class="form-control" 
+                             [ngClass]="{'is-invalid': formulario['domicilio'].get('colonia')?.errors?.['required'] && formulario['domicilio'].get('colonia')?.touched}"
+                             formControlName="colonia">
+                      <div *ngIf="formulario['domicilio'].get('colonia')?.errors?.['required'] && formulario['domicilio'].get('colonia')?.touched" 
+                           class="invalid-feedback">
+                        La colonia es requerida
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <label for="codigoPostal">Código Postal <span class="text-danger">*</span></label>
+                      <input type="text" id="codigoPostal" class="form-control" 
+                             [ngClass]="{'is-invalid': (formulario['domicilio'].get('codigoPostal')?.errors?.['required'] || formulario['domicilio'].get('codigoPostal')?.errors?.['pattern']) && formulario['domicilio'].get('codigoPostal')?.touched}"
+                             formControlName="codigoPostal">
+                      <div *ngIf="formulario['domicilio'].get('codigoPostal')?.errors?.['required'] && formulario['domicilio'].get('codigoPostal')?.touched" 
+                           class="invalid-feedback">
+                        El código postal es requerido
+                      </div>
+                      <div *ngIf="formulario['domicilio'].get('codigoPostal')?.errors?.['pattern'] && formulario['domicilio'].get('codigoPostal')?.touched" 
+                           class="invalid-feedback">
+                        El código postal debe ser de 5 dígitos
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <label for="ciudad">Ciudad <span class="text-danger">*</span></label>
+                      <select id="nomciudad" class="form-control" 
+                              [ngClass]="{'is-invalid': formulario['domicilio'].get('ciudad')?.errors?.['required'] && formulario['domicilio'].get('ciudad')?.touched}"
+                              formControlName="ciudad">
+                        <option value="">Seleccione...</option>
+                        <option *ngFor="let ciudad of ciudadOpciones" [value]="ciudad.nomCiudad || ciudad">
+                          {{ ciudad.nomCiudad || ciudad }}
+                        </option>
+                      </select>
+                      <div *ngIf="formulario['domicilio'].get('ciudad')?.errors?.['required'] && formulario['domicilio'].get('ciudad')?.touched" 
+                           class="invalid-feedback">
+                        La ciudad es requerida
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Información de Trabajo -->
+              <div class="form-section mt-4">
+                <h3>Información Laboral</h3>
+                
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label for="departamento">Departamento <span class="text-danger">*</span></label>
+                      <select id="nomDepartamento" class="form-control" 
+                              [ngClass]="{'is-invalid': formulario['departamento'].errors?.['required'] && formulario['departamento'].touched}"
+                              formControlName="departamento">
+                        <option value="">Seleccione...</option>
+                        <option *ngFor="let depto of departamentoOpciones" [value]="depto.nomDepartamento || depto">
+                          {{ depto.nomDepartamento || depto }}
+                        </option>
+                      </select>
+                      <div *ngIf="formulario['departamento'].errors?.['required'] && formulario['departamento'].touched" 
+                           class="invalid-feedback">
+                        El departamento es requerido
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label for="puesto">Puesto <span class="text-danger">*</span></label>
+                      <select id="nomPuesto" class="form-control" 
+                              [ngClass]="{'is-invalid': formulario['puesto'].errors?.['required'] && formulario['puesto'].touched}"
+                              formControlName="puesto">
+                        <option value="">Seleccione...</option>
+                        <option *ngFor="let puesto of puestoOpciones" [value]="puesto.nomPuesto || puesto">
+                          {{ puesto.nomPuesto || puesto }}
+                        </option>
+                      </select>
+                      <div *ngIf="formulario['puesto'].errors?.['required'] && formulario['puesto'].touched" 
+                           class="invalid-feedback">
+                        El puesto es requerido
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="rol">Rol en el Sistema <span class="text-danger">*</span></label>
+                            <select id="rol" class="form-control" 
+                                    [ngClass]="{'is-invalid': formulario['rol'].errors?.['required'] && formulario['rol'].touched}"
+                                    formControlName="rol">
+                                <option value="">Seleccione...</option>
+                                <option *ngFor="let rol of rolOpciones" [value]="rol.rol || rol">
+                                    {{ rol.rol == 1 ? 'Administrador de Empleados' : 
+                                       rol.rol == 2 ? 'Administrador de Recursos' : 
+                                       rol.rol == 3 ? 'Empleado' : 'Desconocido' }}
+                                </option>
+                            </select>
+                            <div *ngIf="formulario['rol'].errors?.['required'] && formulario['rol'].touched" 
+                                 class="invalid-feedback">
+                                El rol es requerido
+                            </div>
+                        </div>
+                    </div>
+                    
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label for="activo">Estado</label>
+                      <div class="form-check">
+                        <input type="checkbox" id="activo" class="form-check-input" formControlName="activo">
+                        <label class="form-check-label" for="activo">Empleado Activo</label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Información de Contacto -->
+              <div class="form-section mt-4">
+                <h3>Información de Contacto</h3>
+                
+                <!-- Teléfonos -->
+                <div class="form-subsection">
+                  <label>Teléfonos <span class="text-danger">*</span></label>
+                  <div formArrayName="telefono">
+                    <div *ngFor="let telefonoControl of telefonos.controls; let i = index" class="row mb-2">
+                      <div class="col-md-10">
+                        <input type="text" class="form-control" 
+                               [ngClass]="{'is-invalid': telefonoControl.errors?.['required'] || telefonoControl.errors?.['pattern']}"
+                               [formControlName]="i" placeholder="10 dígitos">
+                        <div *ngIf="telefonoControl.errors?.['required'] && telefonoControl.touched" 
+                             class="invalid-feedback">
+                          El teléfono es requerido
+                        </div>
+                        <div *ngIf="telefonoControl.errors?.['pattern'] && telefonoControl.touched" 
+                             class="invalid-feedback">
+                          El teléfono debe ser de 10 dígitos
+                        </div>
+                      </div>
+                      <div class="col-md-2">
+                        <button type="button" class="btn btn-danger btn-sm" (click)="eliminarTelefono(i)" 
+                                [disabled]="telefonos.length === 1">
+                          <i class="fa fa-trash"></i> Eliminar
+                        </button>
+                      </div>
+                    </div>
+                    <button type="button" class="btn btn-info btn-sm" (click)="agregarTelefono()">
+                      <i class="fa fa-plus"></i> Agregar Teléfono
+                    </button>
+                  </div>
+                </div>
+                
+                <!-- Correos Electrónicos -->
+                <div class="form-subsection mt-3">
+                  <label>Correos Electrónicos <span class="text-danger">*</span></label>
+                  <div formArrayName="correoElectronico">
+                    <div *ngFor="let correoControl of correosElectronicos.controls; let i = index" class="row mb-2">
+                      <div class="col-md-10">
+                        <input type="email" class="form-control" 
+                               [ngClass]="{'is-invalid': correoControl.errors?.['required'] || correoControl.errors?.['email']}"
+                               [formControlName]="i" placeholder="correo@ejemplo.com">
+                        <div *ngIf="correoControl.errors?.['required'] && correoControl.touched" 
+                             class="invalid-feedback">
+                          El correo electrónico es requerido
+                        </div>
+                        <div *ngIf="correoControl.errors?.['email'] && correoControl.touched" 
+                             class="invalid-feedback">
+                          El formato del correo electrónico es incorrecto
+                        </div>
+                      </div>
+                      <div class="col-md-2">
+                        <button type="button" class="btn btn-danger btn-sm" (click)="eliminarCorreo(i)" 
+                                [disabled]="correosElectronicos.length === 1">
+                          <i class="fa fa-trash"></i> Eliminar
+                        </button>
+                      </div>
+                    </div>
+                    <button type="button" class="btn btn-info btn-sm" (click)="agregarCorreo()">
+                      <i class="fa fa-plus"></i> Agregar Correo
+                    </button>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Referencias Familiares -->
+              <div class="form-section mt-4">
+                <h3>Referencias Familiares</h3>
+                
+                <div formArrayName="referenciasFamiliares">
+                  <div *ngFor="let referenciaGroup of referencias.controls; let i = index" class="card mb-3 p-3">
+                    <div [formGroupName]="i">
+                      <div class="row">
+                        <div class="col-md-6">
+                          <div class="form-group">
+                            <label>Nombre Completo <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" 
+                                   [ngClass]="{'is-invalid': referenciaGroup.get('nomCompleto')?.errors?.['required'] && referenciaGroup.get('nomCompleto')?.touched}"
+                                   formControlName="nomCompleto">
+                            <div *ngIf="referenciaGroup.get('nomCompleto')?.errors?.['required'] && referenciaGroup.get('nomCompleto')?.touched" 
+                                 class="invalid-feedback">
+                              El nombre completo es requerido
+                            </div>
+                          </div>
+                        </div>
+                        <div class="col-md-6">
+                          <div class="form-group">
+                            <label>Parentesco <span class="text-danger">*</span></label>
+                            <select class="form-control" 
+                                   [ngClass]="{'is-invalid': referenciaGroup.get('parentesco')?.errors?.['required'] && referenciaGroup.get('parentesco')?.touched}"
+                                   formControlName="parentesco">
+                              <option value="">Seleccione...</option>
+                              <option *ngFor="let parentesco of parentescoOpciones" [value]="parentesco.parentesco || parentesco">
+                                {{ parentesco.parentesco || parentesco }}
+                              </option>
+                            </select>
+                            <div *ngIf="referenciaGroup.get('parentesco')?.errors?.['required'] && referenciaGroup.get('parentesco')?.touched" 
+                                 class="invalid-feedback">
+                              El parentesco es requerido
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <!-- Teléfonos de referencia -->
+                      <div class="form-subsection">
+                        <label>Teléfonos <span class="text-danger">*</span></label>
+                        <div formArrayName="telefono">
+                          <div *ngFor="let telControl of getTelefonosReferencia(i).controls; let j = index" class="row mb-2">
+                            <div class="col-md-10">
+                              <input type="text" class="form-control" 
+                                     [ngClass]="{'is-invalid': telControl.errors?.['required'] || telControl.errors?.['pattern']}"
+                                     [formControlName]="j" placeholder="10 dígitos">
+                              <div *ngIf="telControl.errors?.['required'] && telControl.touched" 
+                                   class="invalid-feedback">
+                                El teléfono es requerido
+                              </div>
+                              <div *ngIf="telControl.errors?.['pattern'] && telControl.touched" 
+                                   class="invalid-feedback">
+                                El teléfono debe ser de 10 dígitos
+                              </div>
+                            </div>
+                            <div class="col-md-2">
+                              <button type="button" class="btn btn-danger btn-sm" (click)="eliminarTelefonoReferencia(i, j)" 
+                                      [disabled]="getTelefonosReferencia(i).length === 1">
+                                <i class="fa fa-trash"></i> Eliminar
+                              </button>
+                            </div>
+                          </div>
+                          <button type="button" class="btn btn-info btn-sm" (click)="agregarTelefonoReferencia(i)">
+                            <i class="fa fa-plus"></i> Agregar Teléfono
+                          </button>
+                        </div>
+                      </div>
+                      
+                      <!-- Correos de referencia -->
+                      <div class="form-subsection mt-3">
+                        <label>Correos Electrónicos <span class="text-danger">*</span></label>
+                        <div formArrayName="correo">
+                          <div *ngFor="let correoRefControl of getCorreosReferencia(i).controls; let j = index" class="row mb-2">
+                            <div class="col-md-10">
+                              <input type="email" class="form-control" 
+                                     [ngClass]="{'is-invalid': correoRefControl.errors?.['required'] || correoRefControl.errors?.['email']}"
+                                     [formControlName]="j" placeholder="correo@ejemplo.com">
+                              <div *ngIf="correoRefControl.errors?.['required'] && correoRefControl.touched" 
+                                   class="invalid-feedback">
+                                El correo electrónico es requerido
+                              </div>
+                              <div *ngIf="correoRefControl.errors?.['email'] && correoRefControl.touched" 
+                                   class="invalid-feedback">
+                                El formato del correo electrónico es incorrecto
+                              </div>
+                            </div>
+                            <div class="col-md-2">
+                              <button type="button" class="btn btn-danger btn-sm" (click)="eliminarCorreoReferencia(i, j)" 
+                                      [disabled]="getCorreosReferencia(i).length === 1">
+                                <i class="fa fa-trash"></i> Eliminar
+                              </button>
+                            </div>
+                          </div>
+                          <button type="button" class="btn btn-info btn-sm" (click)="agregarCorreoReferencia(i)">
+                            <i class="fa fa-plus"></i> Agregar Correo
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <!-- Botón para eliminar referencia -->
+                    <div class="mt-3 text-right">
+                      <button type="button" class="btn btn-danger" (click)="eliminarReferencia(i)" 
+                              [disabled]="referencias.length === 1">
+                        <i class="fa fa-trash"></i> Eliminar Referencia
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <!-- Botón para agregar nueva referencia -->
+                  <div class="mt-2">
+                    <button type="button" class="btn btn-info" (click)="agregarReferencia()">
+                      <i class="fa fa-plus"></i> Agregar Nueva Referencia
+                    </button>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Botones de acción -->
+              <div class="form-section mt-4 text-right">
+                <button type="button" class="btn btn-secondary mr-2" (click)="cancelar()">
+                  <i class="fa fa-times"></i> Cancelar
+                </button>
+                <button type="submit" class="btn btn-primary">
+                  <i class="fa fa-save"></i> Guardar Cambios
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>

@@ -4,8 +4,11 @@ import { CatalogosService } from '../../../services/catalogos.service';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { NgxPaginationModule } from 'ngx-pagination';
+import { Router } from '@angular/router';
 import { ApiResponse, FiltrosEmpleado, Empleado } from '../../interface/empleado.interface';
 import { HttpErrorResponse } from '@angular/common/http';
+
+
 
 @Component({
   selector: 'app-listar-empleado',
@@ -64,7 +67,9 @@ export class ListarEmpleadoComponent implements OnInit {
 
   constructor(
     private empleadoService: EmpleadoService,
-    private catalogoService: CatalogosService
+    private catalogoService: CatalogosService,
+    private router: Router
+
   ) { }
 
   ngOnInit(): void {
@@ -147,6 +152,9 @@ export class ListarEmpleadoComponent implements OnInit {
         this.checkAndLoadEmpleados();
       }
     });
+  }
+  isArray(value: any): boolean {
+    return Array.isArray(value);
   }
   
   checkAndLoadEmpleados(): void {
@@ -245,7 +253,20 @@ export class ListarEmpleadoComponent implements OnInit {
 
   seleccionarEmpleado(empleado: any): void {
     this.empleadoSeleccionado = empleado;
-    console.log('Empleado seleccionado:', empleado);
+    
+    this.empleadoService.obtenerEmpleado(empleado.claveEmpleado).subscribe({
+      next: (respuesta) => {
+        if (respuesta.exito) {
+          this.empleadoSeleccionado = respuesta.empleado;
+        } else {
+          this.mensaje = 'Error al obtener detalles del empleado';
+        }
+      },
+      error: (error) => {
+        this.mensaje = 'Error al conectar con el servidor';
+        console.error('Error al obtener detalles:', error);
+      }
+    });
   }
 
   mostrarConfirmacionEliminar(empleado: any): void {
@@ -262,6 +283,10 @@ export class ListarEmpleadoComponent implements OnInit {
     this.mostrarDialogoEliminar = false;
     this.mostrarDialogoReactivar = false;
     this.empleadoAccion = null;
+  }
+
+  editarEmpleado(empleado: any): void {
+    this.router.navigate(['home', 'admin-editar', empleado.claveEmpleado]);
   }
 
   eliminarEmpleado(clave: string): void {
@@ -285,6 +310,7 @@ export class ListarEmpleadoComponent implements OnInit {
     });
   }
 
+    
   reactivarEmpleado(clave: string): void {
     console.log('Reactivando empleado:', clave);
     this.empleadoService.actualizarEmpleado(clave, { activo: true }).subscribe({

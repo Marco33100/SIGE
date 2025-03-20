@@ -46,7 +46,7 @@ export class HomeComponent implements OnInit {
           { label: 'Buscar empleado', icon: 'search', url: '/home/buscar-empleado' },
           { label: 'Registrar empleado', icon: 'app_registration', url: '/home/registrar-empleado' },
           { label: 'Listar empleado', icon: 'list', url: '/home/listar-empleado' },
-          { label: 'Mis datos personales', icon: 'app_registration', url: '/home/visualizar-datos' },
+          { label: 'Mis datos personales', icon: 'person', url: '/home/visualizar-datos' },
           { label: 'Editar datos', icon: 'edit', url: '/home/editar-datos' },
           { label: 'Cerrar Sesión', icon: 'exit_to_app', url: '/login' },
 
@@ -59,7 +59,7 @@ export class HomeComponent implements OnInit {
           { label: 'Gestion de Empleados', icon: 'groups', url: '/home/buscar-empleadoCA' },
           {label: 'Visualizar Actividades', icon: 'visibility', url: '/home/visualizar-actividad'},
           {label: 'Visualizar Cursos', icon:'visibility', url: '/home/visualizar-curso'},
-          { label: 'Mis datos personales', icon: 'app_registration', url: '/home/visualizar-datos' },
+          { label: 'Mis datos personales', icon: 'person', url: '/home/visualizar-datos' },
           { label: 'Editar datos', icon: 'edit', url: '/home/editar-datos' },
           { label: 'Cerrar Sesión', icon: 'exit_to_app', url: '/login' },
         ];
@@ -69,7 +69,7 @@ export class HomeComponent implements OnInit {
           { label: 'Mis cursos', icon: 'school', url: '/home/mis-cursos' },
           {label: 'Mis Actividades', icon: 'school', url: '/home/mis-actividades'},
           {label: 'Agregar curso', icon:'add_circle', url:'/home/agregar-cursos'},
-          { label: 'Mis datos personales', icon: 'app_registration', url: '/home/visualizar-datos' },
+          { label: 'Mis datos personales', icon: 'person', url: '/home/visualizar-datos' },
           { label: 'Editar datos', icon: 'edit', url: '/home/editar-datos' },
           { label: 'Cerrar Sesión', icon: 'exit_to_app', url: '/login' },
 

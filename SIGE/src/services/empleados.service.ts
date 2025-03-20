@@ -64,6 +64,11 @@ export class EmpleadoService {
     return this.http.put(`${this.apiUrl}/${claveEmpleado}`, datosActualizados);
   }
 
+    // CU10: Editar datos del empleado ADMIN
+  actualizarEmpleadoAdmin(claveEmpleado: string, datosActualizados: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/admin/${claveEmpleado}`, datosActualizados);
+  }
+
   // CU11: Consultar información personal del empleado
   obtenerInfoPersonal(claveEmpleado: string): Observable<any> {
     // Usar los headers de autenticación desde AuthService

@@ -27,7 +27,7 @@ export class RegistrarEmpleadoComponent implements OnInit {
     parentescos: []
   };
   loading = true;
-  previewImage: string | ArrayBuffer | null = null;
+  previewImage: string | null = null;
   mensaje: string = '';
 
   // Control de carga de catálogos
@@ -62,7 +62,7 @@ export class RegistrarEmpleadoComponent implements OnInit {
       confirmarContraseña: ['', Validators.required],
       fechaNacimiento: ['', Validators.required],
       sexo: ['', Validators.required],
-      fotoEmpleado: [''],
+      fotoEmpleadoUrl: ['', [Validators.pattern(/^(http|https):\/\/.+/)]],
       departamento: ['', Validators.required],
       puesto: ['', Validators.required],
       rol: ['', Validators.required],
@@ -102,6 +102,7 @@ export class RegistrarEmpleadoComponent implements OnInit {
       }
     });
     
+    // Resto de cargas de catálogos sin cambios...
     this.catalogosService.getPuestos().subscribe({
       next: puestos => {
         this.catalogos.puestos = puestos;
@@ -185,7 +186,26 @@ export class RegistrarEmpleadoComponent implements OnInit {
     }
   }
 
-  // Métodos para teléfonos
+  // Método para cargar la imagen por URL
+  cargarImagenPorUrl(): void {
+  const url = this.empleadoForm.get('fotoEmpleadoUrl')?.value;
+  if (this.validarImagenUrl(url)) {
+    this.previewImage = url;
+  } else {
+    this.previewImage = null;
+    alert('Por favor ingrese una URL válida de imagen (debe terminar en .jpeg, .jpg, .gif o .png)');
+  }
+}
+
+  // Método para validar la imagen
+  validarImagenUrl(url: string | null): boolean {
+    if (typeof url !== 'string' || url.trim() === '') {
+      return false;
+    }
+    return url.match(/\.(jpeg|jpg|gif|png)$/) !== null;
+  }
+
+  // Métodos para teléfonos (sin cambios)
   get telefonos(): FormArray {
     return this.empleadoForm.get('telefono') as FormArray;
   }
@@ -208,7 +228,7 @@ export class RegistrarEmpleadoComponent implements OnInit {
     }
   }
 
-  // Métodos para correos
+  // Métodos para correos (sin cambios)
   get correos(): FormArray {
     return this.empleadoForm.get('correoElectronico') as FormArray;
   }
@@ -231,7 +251,7 @@ export class RegistrarEmpleadoComponent implements OnInit {
     }
   }
 
-  // Métodos para referencias familiares
+  // Métodos para referencias familiares (sin cambios)
   get referencias(): FormArray {
     return this.empleadoForm.get('referenciasFamiliares') as FormArray;
   }
@@ -285,22 +305,6 @@ export class RegistrarEmpleadoComponent implements OnInit {
     }
   }
 
-  onFileChange(event: any): void {
-    const file = event.target.files[0];
-    if (file && file.type.startsWith('image/')) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        this.previewImage = reader.result;
-        this.empleadoForm.patchValue({ fotoEmpleado: reader.result });
-      };
-      reader.readAsDataURL(file);
-    } else {
-      this.previewImage = null;
-      this.empleadoForm.patchValue({ fotoEmpleado: '' });
-      alert('Por favor seleccione un archivo de imagen válido');
-    }
-  }
-
   onSubmit(): void {
     if (this.empleadoForm.invalid) {
       this.markAllAsTouched();
@@ -332,6 +336,7 @@ export class RegistrarEmpleadoComponent implements OnInit {
     const formValue = this.empleadoForm.value;
     return {
       ...formValue,
+      fotoEmpleado: formValue.fotoEmpleadoUrl, // Usar la URL de la foto
       domicilio: {
         ...formValue.domicilio,
         codigoPostal: Number(formValue.domicilio.codigoPostal)
@@ -368,5 +373,4 @@ export class RegistrarEmpleadoComponent implements OnInit {
   cancelar(): void {
     this.router.navigate(['/empleados']);
   }
-  
 }

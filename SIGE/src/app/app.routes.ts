@@ -15,6 +15,7 @@ import { MisCursosComponent } from './empleado/mis-cursos/mis-cursos.component';
 import { AgregarCursoComponent } from './empleado/agregar-curso/agregar-curso.component';
 import { VisualizarDatosComponent } from './empleado/visualizar-datos/visualizar-datos.component';
 import { EditarDatosComponent } from './empleado/editar-datos/editar-datos.component';
+import { AdminEditarEmpleadoComponent } from './admin_empleado/admin-editar-empleado/admin-editar-empleado.component';
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
   {
@@ -36,7 +37,9 @@ export const routes: Routes = [
       {path: 'mis-cursos', component:MisCursosComponent},
       {path: 'agregar-cursos', component:AgregarCursoComponent},
       {path: 'visualizar-datos', component: VisualizarDatosComponent },
-      {path: 'editar-datos', component: EditarDatosComponent }
+      {path: 'editar-datos', component: EditarDatosComponent },
+      { path: 'admin-editar/:id', component: AdminEditarEmpleadoComponent }
+
 
     ]
   },

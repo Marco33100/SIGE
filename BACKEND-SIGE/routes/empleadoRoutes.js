@@ -74,20 +74,23 @@ router.post('/login', async (req, res) => {
     }
 });
 
-// Función para generar clave de empleado
+// Función para generar clave de empleado en formato RASG-001
 const generarClaveEmpleado = async (nombre, apellidoP, apellidoM = '') => {
+    // Obtener iniciales de cada parte del nombre y apellidos
     const iniciales = [
         ...nombre.split(' ').map(p => p[0].toUpperCase()),
         apellidoP[0].toUpperCase(),
         apellidoM?.[0]?.toUpperCase() || ''
     ].join('');
 
+    // Buscar el último consecutivo existente
     const ultimo = await Empleado.findOne(
         { claveEmpleado: new RegExp(`^${iniciales}-\\d{3}$`) },
         { claveEmpleado: 1 },
         { sort: { claveEmpleado: -1 } }
     ).lean();
 
+    // Calcular nuevo consecutivo
     const consecutivo = ultimo 
         ? parseInt(ultimo.claveEmpleado.split('-')[1]) + 1
         : 1;
@@ -95,17 +98,19 @@ const generarClaveEmpleado = async (nombre, apellidoP, apellidoM = '') => {
     return `${iniciales}-${consecutivo.toString().padStart(3, '0')}`;
 };
 
-// Función para generar RFC
+// Función para generar RFC en formato SIGR-770910
 const generarRFC = (apellidoP, apellidoM = '', nombre, fechaNac) => {
     const fecha = new Date(fechaNac);
+    
+    // Componentes del RFC
     const componentes = {
-        apellido1: apellidoP.slice(0, 2).toUpperCase(),
-        apellido2: apellidoM?.[0]?.toUpperCase() || 'X',
+        apellidoP: apellidoP.slice(0, 2).toUpperCase(),
+        apellidoM: apellidoM?.[0]?.toUpperCase() || 'X',
         nombre: nombre[0].toUpperCase(),
-        fecha: fecha.toISOString().slice(2, 10).replace(/-/g, '')
+        fecha: `${fecha.getFullYear().toString().slice(-2)}${(fecha.getMonth() + 1).toString().padStart(2, '0')}${fecha.getDate().toString().padStart(2, '0')}`
     };
     
-    return `${componentes.apellido1}${componentes.apellido2}${componentes.nombre}${componentes.fecha}`;
+    return `${componentes.apellidoP}${componentes.apellidoM}${componentes.nombre}-${componentes.fecha}`;
 };
 
 // CU02: Registrar nuevo empleado
@@ -170,14 +175,12 @@ router.post('/registrar', async (req, res) => {
             }
         }
 
-        // 5. Hashear contraseña
-        const hashedPass = await bcrypt.hash(req.body.contraseña, 10);
 
         // 6. Crear objeto empleado
         const empleadoData = {
             claveEmpleado,
             ...req.body,
-            contraseña: hashedPass,
+            contraseña: req.body.contraseña,
             rfc: req.body.rfc || rfc,
             domicilio: {
                 ...req.body.domicilio,
