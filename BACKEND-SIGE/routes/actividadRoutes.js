@@ -20,16 +20,16 @@ router.post('/agregarActividadEmpleado', async (req, res) => {
             return res.status(404).json({ msg: 'El empleado no existe' });
         }
         
-        // Verificar que la actividad exista en el catálogo
+        // Verificar que la actividad exista
         const actividadExiste = await Actividad.findOne({ nomActividad });
         if (!actividadExiste) {
             return res.status(404).json({ msg: 'La actividad no existe en el catálogo' });
         }
         
-        // Verificar que el estatus exista en el catálogo
+        // Verificar que el estatus exista
         const estatusExiste = await Estatus.findOne({ estatus: estatusActividad });
         if (!estatusExiste && estatusActividad !== undefined) {
-            return res.status(404).json({ msg: 'El estatus especificado no existe en el catálogo' });
+            return res.status(404).json({ msg: 'El estatus no existe en el catálogo' });
         }
         // Crear nueva actividad para el empleado
         const nuevaActividadEmpleado = new ActividadEmpleado({
@@ -95,7 +95,6 @@ router.get('/visualizarActividades', async (req, res) => {
             filtro.push({ nomActividad: nomActividad });
         }
         
-        // Si no hay filtros, devolver todas las actividades
         const actividades = filtro.length === 0
             ? await ActividadEmpleado.find()
             : await ActividadEmpleado.find({ $or: filtro });
@@ -115,10 +114,10 @@ router.get('/visualizarActividades', async (req, res) => {
 router.get('/visualizarActividadesE', autenticarEmpleado, async (req, res) => {
     try {
         const { estatusActividad, nomActividad } = req.query;
-        const claveEmpleado = req.claveEmpleado; // Obtener la clave del empleado autenticado
+        const claveEmpleado = req.claveEmpleado; 
 
         // Construir el filtro
-        const filtro = { claveEmpleado }; // Solo actividades del empleado autenticado
+        const filtro = { claveEmpleado }; 
 
         if (estatusActividad !== undefined && estatusActividad !== '') {
             filtro.estatusActividad = Number(estatusActividad);
@@ -128,7 +127,6 @@ router.get('/visualizarActividadesE', autenticarEmpleado, async (req, res) => {
             filtro.nomActividad = nomActividad;
         }
 
-        // Buscar actividades con el filtro
         const actividades = await ActividadEmpleado.find(filtro);
 
         res.json({

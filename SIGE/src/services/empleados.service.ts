@@ -18,7 +18,6 @@ export class EmpleadoService {
   ) { }
 
   // CU01: Inicio de sesión - Ya no es necesario aquí ya que está en AuthService
-  // Se mantiene por compatibilidad pero debería redirigir al AuthService
   login(claveEmpleado: string, contraseña: string): Observable<any> {
     return this.authService.login(claveEmpleado, contraseña);
   }

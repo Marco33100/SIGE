@@ -175,21 +175,6 @@ router.get('/buscarE/:claveEmpleado', async (req, res) => {
     }
 });
 
-// CUI14: Mostrar opciones "Actividades" o "Cursos"
-router.get('/opciones', async (req, res) => {
-    try {
-        const opciones = [
-            { id: 'actividades', nombre: 'Actividades' },
-            { id: 'cursos', nombre: 'Cursos' }
-        ];
-
-        res.json(opciones);
-    } catch (error) {
-        console.error('Error al obtener opciones:', error);
-        res.status(500).json({ msg: 'Error interno del servidor' });
-    }
-});
-
 // CUE12: Visualizar cursos del empleado
 router.get('/visualizarCursosEmpleado/:claveEmpleado', async (req, res) => {
     try {
@@ -369,8 +354,8 @@ router.get('/visualizarCursos', async (req, res) => {
             tipoDocumento,
             especialidad,
             claveEmpleado,
-            page = 1, // Página actual (por defecto 1)
-            pageSize = 10 // Tamaño de la página (por defecto 10)
+            page = 1, 
+            pageSize = 10
         } = req.query;
 
         // Construir el filtro
@@ -396,19 +381,15 @@ router.get('/visualizarCursos', async (req, res) => {
             filtro.claveEmpleado = claveEmpleado;
         }
 
-        // Calcular el índice de inicio
         const startIndex = (page - 1) * pageSize;
 
-        // Obtener los cursos paginados
         const cursos = await CursoEmpleado.find(filtro)
-            .skip(startIndex) // Saltar los registros anteriores
-            .limit(Number(pageSize)); // Limitar la cantidad de registros por página
-
-        // Obtener el total de cursos (para calcular el total de páginas)
+            .skip(startIndex) 
+            .limit(Number(pageSize)); 
         const totalCursos = await CursoEmpleado.countDocuments(filtro);
 
         res.json({
-            total: totalCursos, // Total de cursos (para la paginación en el frontend)
+            total: totalCursos,
             cursos
         });
     } catch (error) {

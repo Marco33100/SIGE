@@ -480,7 +480,7 @@ router.get('/:claveEmpleado', async (req, res) => {
 });
 
 
-// CU10: Editar datos del empleado 
+// CU10: Editar datos del empleado(empleado) 
 router.put('/:claveEmpleado', async (req, res) => {
     try {
         const { claveEmpleado } = req.params;
@@ -542,6 +542,65 @@ router.put('/:claveEmpleado', async (req, res) => {
         });
     }
 });
+
+// CU10: Editar datos del empleado (para el admin)
+router.put('/admin/:claveEmpleado', async (req, res) => {
+    try {
+        const { claveEmpleado } = req.params;
+        const datosActualizados = req.body;
+
+        // Validar que se proporcionó una clave de empleado
+        if (!claveEmpleado) {
+            return res.status(400).json({
+                exito: false,
+                mensaje: 'Se requiere la clave de empleado'
+            });
+        }
+
+        // Verificar si el empleado existe
+        const empleadoExistente = await Empleado.findOne({ claveEmpleado });
+        if (!empleadoExistente) {
+            return res.status(404).json({
+                exito: false,
+                mensaje: `No se encontró empleado con la clave: ${claveEmpleado}`
+            });
+        }
+
+        // Eliminar campos que no se deben modificar de los datos enviados
+        const camposProtegidos = [
+            'claveEmpleado', // No se puede modificar la clave del empleado
+            'fechaAlta', // No se puede modificar la fecha de alta
+        ];
+
+        const datosPermitidos = { ...datosActualizados };
+        camposProtegidos.forEach(campo => {
+            delete datosPermitidos[campo];
+        });
+
+        // Actualizar solo los campos permitidos
+        const empleadoActualizado = await Empleado.findOneAndUpdate(
+            { claveEmpleado },
+            datosPermitidos,
+            { new: true, runValidators: true }
+        );
+
+        // Responder con los datos actualizados
+        res.status(200).json({
+            exito: true,
+            mensaje: 'Datos del empleado actualizados con éxito',
+            empleado: empleadoActualizado
+        });
+
+    } catch (error) {
+        console.error('Error al actualizar empleado:', error);
+        res.status(500).json({
+            exito: false,
+            mensaje: 'Error al actualizar los datos del empleado',
+            error: error.message
+        });
+    }
+});
+
 
 // CU11: Consultar información personal del empleado
 router.get('/personal/:claveEmpleado', async (req, res) => {
